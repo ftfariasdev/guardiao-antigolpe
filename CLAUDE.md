@@ -65,7 +65,7 @@ pnpm test && pnpm typecheck
 ## Plano
 
 - [x] D1: monorepo, tokens, schemas compartilhados, parser do Pix, `/api/v1/saude`, schema do Prisma
-- [ ] D1: primeira migração, deploy vazio (Vercel + Railway) com `/saude` respondendo
+- [x] D1: primeira migração, deploy vazio (Vercel + Railway) com `/saude` respondendo
 - [ ] D2: motor (normalização, regras, LLM, fusão) + script de avaliação no CI
 - [ ] D3: telas do protegido (início, análise, resultados) com acessibilidade
 - [ ] D4: família, convite por QR, alertas em tempo real, push e escalonamento

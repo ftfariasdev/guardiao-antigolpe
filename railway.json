@@ -1,0 +1,16 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "RAILPACK",
+    "buildCommand": "pnpm --filter @guardiao/api build",
+    "watchPatterns": ["apps/api/**", "packages/**", "package.json", "pnpm-lock.yaml", "railway.json"]
+  },
+  "deploy": {
+    "preDeployCommand": ["pnpm --filter @guardiao/api db:deploy"],
+    "startCommand": "pnpm --filter @guardiao/api start",
+    "healthcheckPath": "/api/v1/saude",
+    "healthcheckTimeout": 120,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 5
+  }
+}

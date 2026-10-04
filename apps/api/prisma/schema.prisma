@@ -1,0 +1,212 @@
+// Guardião Antigolpe — modelo de dados (doc "Arquitetura técnica").
+// Nenhuma tabela guarda o conteúdo bruto das mensagens: só resultado e sinais.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Papel {
+  protegido
+  guardiao
+}
+
+enum TipoEntrada {
+  texto
+  imagem
+  audio
+  link
+  pix
+}
+
+enum Risco {
+  verde
+  amarelo
+  vermelho
+}
+
+enum TipoGolpe {
+  falso_parente
+  falsa_central
+  falso_boleto
+  falso_emprego
+  falso_motoboy
+  link_falso
+  falso_investimento
+  compra_falsa
+  outro
+  nenhum
+}
+
+enum StatusAlerta {
+  enviado
+  visto
+  respondido
+  expirado
+}
+
+enum RespostaAlerta {
+  era_golpe
+  pode_seguir
+}
+
+enum ResultadoTreino {
+  pendente
+  encaminhou
+  caiu
+  ignorou
+}
+
+enum StatusPitch {
+  aberta
+  revelada
+  encerrada
+}
+
+enum TipoEventoPitch {
+  acessou
+  confirmou
+}
+
+model Familia {
+  id                      String    @id @default(uuid()) @db.Uuid
+  nome                    String
+  /// argon2id; a palavra-senha nunca é lida de volta
+  palavraSenhaHash        String?   @map("palavra_senha_hash")
+  mostrarConteudoOriginal Boolean   @default(false) @map("mostrar_conteudo_original")
+  criadoEm                DateTime  @default(now()) @map("criado_em")
+  membros                 Membro[]
+  convites                Convite[]
+  analises                Analise[]
+  treinos                 Treino[]
+
+  @@map("familias")
+}
+
+model Membro {
+  id               String    @id @default(uuid()) @db.Uuid
+  familiaId        String    @map("familia_id") @db.Uuid
+  nome             String
+  parentesco       String?
+  papel            Papel
+  /// ordem de acionamento dos guardiões (1 = primeiro)
+  ordem            Int       @default(1)
+  pushSubscription Json?     @map("push_subscription")
+  /// ajustes de acessibilidade (AjustesAcessibilidade em packages/brand)
+  acessibilidade   Json?
+  criadoEm         DateTime  @default(now()) @map("criado_em")
+  familia          Familia   @relation(fields: [familiaId], references: [id], onDelete: Cascade)
+  sessoes          Sessao[]
+  analises         Analise[]
+  alertas          Alerta[]
+  treinosEnviados  Treino[]
+
+  @@index([familiaId])
+  @@map("membros")
+}
+
+model Sessao {
+  id           String   @id @default(uuid()) @db.Uuid
+  membroId     String   @map("membro_id") @db.Uuid
+  /// SHA-256 do token de 32 bytes guardado no aparelho
+  tokenHash    String   @unique @map("token_hash")
+  ultimoAcesso DateTime @default(now()) @map("ultimo_acesso")
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  membro       Membro   @relation(fields: [membroId], references: [id], onDelete: Cascade)
+
+  @@map("sessoes")
+}
+
+model Convite {
+  id        String    @id @default(uuid()) @db.Uuid
+  familiaId String    @map("familia_id") @db.Uuid
+  papel     Papel
+  tokenHash String    @unique @map("token_hash")
+  expiraEm  DateTime  @map("expira_em")
+  usadoEm   DateTime? @map("usado_em")
+  criadoEm  DateTime  @default(now()) @map("criado_em")
+  familia   Familia   @relation(fields: [familiaId], references: [id], onDelete: Cascade)
+
+  @@map("convites")
+}
+
+model Analise {
+  id          String      @id @default(uuid()) @db.Uuid
+  familiaId   String      @map("familia_id") @db.Uuid
+  protegidoId String      @map("protegido_id") @db.Uuid
+  tipoEntrada TipoEntrada @map("tipo_entrada")
+  risco       Risco
+  tipoGolpe   TipoGolpe   @map("tipo_golpe")
+  sinais      Json
+  acao        String
+  confianca   Float
+  /// true quando o LLM falhou e só as regras responderam
+  parcial     Boolean     @default(false)
+  pix         Json?
+  latenciaMs  Int         @map("latencia_ms")
+  criadoEm    DateTime    @default(now()) @map("criado_em")
+  familia     Familia     @relation(fields: [familiaId], references: [id], onDelete: Cascade)
+  protegido   Membro      @relation(fields: [protegidoId], references: [id], onDelete: Cascade)
+  alertas     Alerta[]
+
+  @@index([familiaId, criadoEm])
+  @@map("analises")
+}
+
+model Alerta {
+  id           String          @id @default(uuid()) @db.Uuid
+  analiseId    String          @map("analise_id") @db.Uuid
+  membroId     String          @map("membro_id") @db.Uuid
+  /// quantas vezes o alerta já foi escalado
+  nivel        Int             @default(1)
+  status       StatusAlerta    @default(enviado)
+  resposta     RespostaAlerta?
+  respondidoEm DateTime?       @map("respondido_em")
+  criadoEm     DateTime        @default(now()) @map("criado_em")
+  analise      Analise         @relation(fields: [analiseId], references: [id], onDelete: Cascade)
+  membro       Membro          @relation(fields: [membroId], references: [id], onDelete: Cascade)
+
+  @@index([status, criadoEm])
+  @@map("alertas")
+}
+
+model Treino {
+  id          String          @id @default(uuid()) @db.Uuid
+  familiaId   String          @map("familia_id") @db.Uuid
+  enviadoPorId String         @map("enviado_por") @db.Uuid
+  /// id do modelo no JSON versionado de golpes simulados
+  modelo      String
+  resultado   ResultadoTreino @default(pendente)
+  pontos      Int             @default(0)
+  criadoEm    DateTime        @default(now()) @map("criado_em")
+  familia     Familia         @relation(fields: [familiaId], references: [id], onDelete: Cascade)
+  enviadoPor  Membro          @relation(fields: [enviadoPorId], references: [id], onDelete: Cascade)
+
+  @@map("treinos")
+}
+
+model PitchSessao {
+  id       String        @id @default(uuid()) @db.Uuid
+  status   StatusPitch   @default(aberta)
+  criadoEm DateTime      @default(now()) @map("criado_em")
+  eventos  PitchEvento[]
+
+  @@map("pitch_sessoes")
+}
+
+model PitchEvento {
+  id          String          @id @default(uuid()) @db.Uuid
+  sessaoId    String          @map("sessao_id") @db.Uuid
+  /// aleatório, gerado no navegador; nenhum dado pessoal
+  visitanteId String          @map("visitante_id")
+  tipo        TipoEventoPitch
+  criadoEm    DateTime        @default(now()) @map("criado_em")
+  sessao      PitchSessao     @relation(fields: [sessaoId], references: [id], onDelete: Cascade)
+
+  @@unique([sessaoId, visitanteId, tipo])
+  @@map("pitch_eventos")
+}

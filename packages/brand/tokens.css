@@ -1,0 +1,108 @@
+/* Guardião Antigolpe — design tokens (paleta Escudo)
+   Fonte única de verdade para o app (PWA) e a apresentação (apps/pitch).
+   Contrastes medidos pelo WCAG 2.x; AA para texto exige 4,5:1. */
+
+@import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Sora:wght@300;600;700&family=JetBrains+Mono:wght@400&display=swap");
+
+:root {
+  /* Marca */
+  --tinta: #0E1A3D;    /* títulos no app; fundo do pitch — 15,2:1 sobre névoa */
+  --azul: #2D5BE3;     /* marca, botões, links — 5,0:1 sobre névoa; branco sobre ele 5,7:1 */
+  --ciano: #46E3F2;    /* acento do pitch; SÓ sobre fundo escuro — 11,0:1 sobre tinta */
+  --ardosia: #4A5573;  /* texto secundário — 6,6:1 sobre névoa */
+  --nevoa: #EEF2FB;    /* fundo do app */
+  --branco: #FFFFFF;
+
+  /* Semáforo — reservado; nunca usar na marca. Sempre com ícone + palavra. */
+  --risco-verde: #136C35;     --risco-verde-fundo: #E3F5E9;     /* 5,7:1 */
+  --risco-ambar: #8A5100;     --risco-ambar-fundo: #FFF1D6;     /* 5,8:1 */
+  --risco-vermelho: #B42318;  --risco-vermelho-fundo: #FDE7E5;  /* 5,6:1 */
+
+  /* Papéis semânticos (modo app) */
+  --cor-fundo: var(--nevoa);
+  --cor-superficie: var(--branco);
+  --cor-texto: var(--tinta);
+  --cor-texto-secundario: var(--ardosia);
+  --cor-marca: var(--azul);
+  --cor-acento: var(--azul);
+  --cor-sobre-marca: var(--branco);
+
+  /* Tipografia */
+  --fonte-texto: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --fonte-titulo: "Sora", "Atkinson Hyperlegible", system-ui, sans-serif;
+  --fonte-codigo: "JetBrains Mono", ui-monospace, monospace;
+  --texto-corpo: 20px;       /* mínimo no app do protegido */
+  --texto-resultado: 28px;   /* frase do semáforo */
+  --texto-titulo: 32px;
+  --peso-regular: 400;
+  --peso-forte: 700;
+
+  /* Forma e toque */
+  --raio-pequeno: 8px;
+  --raio-medio: 16px;
+  --raio-pilula: 999px;
+  --alvo-toque: 48px;        /* área mínima de toque */
+  --espaco-1: 4px; --espaco-2: 8px; --espaco-3: 16px; --espaco-4: 24px; --espaco-5: 40px;
+
+  /* Movimento */
+  --duracao-curta: 150ms;
+  --duracao-media: 300ms;
+  --curva-padrao: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Modo apresentação: a mesma marca no escuro, com o ciano como acento. */
+[data-theme="pitch"] {
+  --cor-fundo: var(--tinta);
+  --cor-superficie: #16244F;
+  --cor-texto: var(--branco);
+  --cor-texto-secundario: #B9C3DD;
+  --cor-acento: var(--ciano);
+  --texto-titulo: 64px;
+  --texto-numero: 120px;
+  --texto-codigo: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --duracao-curta: 0ms; --duracao-media: 0ms; }
+}
+
+html { font-family: var(--fonte-texto); font-size: var(--texto-corpo); color: var(--cor-texto); background: var(--cor-fundo); }
+.valor { font-variant-numeric: tabular-nums; } /* R$ 1.500 alinhado em listas e no painel */
+
+/* ===== Acessibilidade =====
+   Aplicados no <html> pelos ajustes do usuário (salvos no aparelho e no cadastro). */
+
+/* Tamanho do texto: 100% é o padrão; soma-se ao tamanho de fonte do sistema. */
+[data-texto="125"] { --escala-texto: 1.25; }
+[data-texto="150"] { --escala-texto: 1.5; }
+[data-texto="175"] { --escala-texto: 1.75; }
+:root { --escala-texto: 1; }
+html { font-size: calc(var(--texto-corpo) * var(--escala-texto)); }
+
+/* Alto contraste: preto, branco e amarelo, contraste mínimo de 7:1 (WCAG AAA). */
+[data-contraste="alto"] {
+  --cor-fundo: #000000;
+  --cor-superficie: #000000;
+  --cor-texto: #FFFFFF;
+  --cor-texto-secundario: #FFFFFF;
+  --cor-marca: #FFE600;
+  --cor-acento: #FFE600;
+  --cor-sobre-marca: #000000;
+  --cor-borda: #FFFFFF;
+  --risco-verde: #7CF29A;     --risco-verde-fundo: #000000;
+  --risco-ambar: #FFD54A;     --risco-ambar-fundo: #000000;
+  --risco-vermelho: #FF8A80;  --risco-vermelho-fundo: #000000;
+  --largura-borda: 3px;
+}
+
+/* Mais espaço entre linhas e letras. */
+[data-espaco="amplo"] { --entrelinha: 1.8; --espaco-letras: 0.04em; }
+:root { --entrelinha: 1.45; --espaco-letras: normal; --largura-borda: 2px; --cor-borda: #C9D3EA; }
+body { line-height: var(--entrelinha); letter-spacing: var(--espaco-letras); }
+
+/* Reduzir animações: pelo ajuste do app ou pela preferência do sistema. */
+[data-movimento="reduzido"] { --duracao-curta: 0ms; --duracao-media: 0ms; }
+
+/* Foco do teclado sempre visível. */
+:focus-visible { outline: 3px solid var(--cor-acento); outline-offset: 3px; }
+[data-contraste="alto"] :focus-visible { outline-width: 4px; }

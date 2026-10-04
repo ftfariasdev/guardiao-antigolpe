@@ -56,6 +56,11 @@ describe("catálogo de regras de texto", () => {
     expect(codigos("Compra de R$ 2.349,90 às 19h. Sra. Maria, ok?")).not.toContain("link_suspeito");
   });
 
+  it("o ponto de milhar não corta o trecho", () => {
+    expect(sinal("Faz um Pix de R$ 1.800 pra mim hoje?", "pedido_dinheiro")?.trecho).toBe("Faz um Pix de R$ 1.800");
+    expect(sinal("Faz um Pix de R$ 1.800 pra mim hoje?", "urgencia_dinheiro")?.trecho).toContain("pra mim hoje");
+  });
+
   it("encurtador e IP são links suspeitos", () => {
     expect(codigos("Resgate agora: bit.ly/pontos")).toContain("link_suspeito");
     expect(codigos("Acesse http://185.20.14.7/login")).toContain("link_suspeito");

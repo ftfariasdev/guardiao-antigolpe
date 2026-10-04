@@ -78,6 +78,7 @@ export const ResultadoAnalise = z.object({
       id: z.string().uuid(),
       status: z.enum(["enviado", "visto", "respondido", "expirado"]),
       guardiao: z.string(),
+      resposta: RespostaAlerta.nullable().default(null),
     })
     .nullable(),
 });
@@ -103,6 +104,96 @@ export const SaidaLLM = z.object({
   confianca: z.number().min(0).max(1),
 });
 export type SaidaLLM = z.infer<typeof SaidaLLM>;
+
+/* ---------- Família, sessão e convites ---------- */
+
+const Nome = z.string().trim().min(1).max(60);
+const Parentesco = z.string().trim().min(1).max(30);
+
+export const MembroResumo = z.object({
+  id: z.string().uuid(),
+  nome: z.string(),
+  parentesco: z.string().nullable(),
+  papel: Papel,
+  /** Ordem de acionamento dos guardiões (1 = primeiro). */
+  ordem: z.number().int(),
+});
+export type MembroResumo = z.infer<typeof MembroResumo>;
+
+export const FamiliaResumo = z.object({
+  id: z.string().uuid(),
+  nome: z.string(),
+  /** A palavra-senha nunca é devolvida; só se sabe se existe. */
+  tem_palavra_senha: z.boolean(),
+  membros: z.array(MembroResumo),
+});
+export type FamiliaResumo = z.infer<typeof FamiliaResumo>;
+
+export const DadosSessao = z.object({ membro: MembroResumo, familia: FamiliaResumo });
+export type DadosSessao = z.infer<typeof DadosSessao>;
+
+/** Resposta de criar família e de aceitar convite: o token só aparece aqui, uma vez. */
+export const SessaoCriada = DadosSessao.extend({ token: z.string().min(32) });
+export type SessaoCriada = z.infer<typeof SessaoCriada>;
+
+export const CriarFamilia = z.object({ nome_familia: Nome, nome: Nome, parentesco: Parentesco.optional() });
+export type CriarFamilia = z.infer<typeof CriarFamilia>;
+
+export const CriarConvite = z.object({ papel: Papel });
+export const ConviteCriado = z.object({ token: z.string().min(32), papel: Papel, expira_em: z.string() });
+export type ConviteCriado = z.infer<typeof ConviteCriado>;
+
+export const AceitarConvite = z.object({ nome: Nome, parentesco: Parentesco.optional() });
+export type AceitarConvite = z.infer<typeof AceitarConvite>;
+
+export const DefinirPalavraSenha = z.object({ palavra: z.string().trim().min(3).max(60) });
+
+export const InscricaoPush = z.object({
+  endpoint: z.string().url(),
+  keys: z.object({ p256dh: z.string().min(1), auth: z.string().min(1) }),
+});
+export type InscricaoPush = z.infer<typeof InscricaoPush>;
+
+export const AtualizarMembro = z
+  .object({
+    ordem: z.number().int().min(1).max(3),
+    push_subscription: InscricaoPush.nullable(),
+    acessibilidade: z.record(z.unknown()),
+  })
+  .partial();
+export type AtualizarMembro = z.infer<typeof AtualizarMembro>;
+
+/* ---------- Alertas ---------- */
+
+export const StatusAlerta = z.enum(["enviado", "visto", "respondido", "expirado"]);
+export type StatusAlerta = z.infer<typeof StatusAlerta>;
+
+export const ResponderAlerta = z.object({ resposta: RespostaAlerta });
+
+/** O que o guardião vê ao abrir um alerta. */
+export const AlertaDetalhe = z.object({
+  id: z.string().uuid(),
+  status: StatusAlerta,
+  resposta: RespostaAlerta.nullable(),
+  nivel: z.number().int(),
+  criado_em: z.string(),
+  protegido: z.object({ nome: z.string(), parentesco: z.string().nullable() }),
+  /** Quem será avisado se este guardião não responder; null se não houver. */
+  proximo_guardiao: z.string().nullable(),
+  valor: z.number().nullable(),
+  analise: ResultadoAnalise,
+});
+export type AlertaDetalhe = z.infer<typeof AlertaDetalhe>;
+
+export const ItemHistorico = z.object({
+  id: z.string().uuid(),
+  criado_em: z.string(),
+  risco: NivelRisco,
+  tipo_golpe: TipoGolpe,
+  titulo: z.string(),
+  alerta: z.object({ id: z.string().uuid(), status: StatusAlerta, resposta: RespostaAlerta.nullable(), guardiao: z.string() }).nullable(),
+});
+export type ItemHistorico = z.infer<typeof ItemHistorico>;
 
 /* ---------- Erros da API ---------- */
 

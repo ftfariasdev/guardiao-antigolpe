@@ -9,7 +9,7 @@ PWA que analisa mensagens suspeitas e avisa a família antes do Pix.
 ```bash
 pnpm install
 cp .env.example .env
-pnpm db:up
+pnpm db:up                      # Postgres na porta 5433
 pnpm --filter @guardiao/api db:generate
 pnpm --filter @guardiao/api db:migrate
 pnpm dev

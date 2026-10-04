@@ -8,6 +8,19 @@ on:
 jobs:
   verificar:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: guardiao
+          POSTGRES_PASSWORD: guardiao
+          POSTGRES_DB: guardiao_teste
+        ports:
+          - 5432:5432
+        options: --health-cmd "pg_isready -U guardiao" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # Banco descartável do próprio job, usado pelos testes de integração da API.
+      DATABASE_URL_TESTE: postgresql://guardiao:guardiao@localhost:5432/guardiao_teste
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

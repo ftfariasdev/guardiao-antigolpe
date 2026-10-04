@@ -34,11 +34,11 @@ avaliacao/      casos rotulados do motor (casos.json)
 ```bash
 pnpm install
 cp .env.example .env            # e preencha as chaves
-pnpm db:up                      # Postgres no Docker
+pnpm db:up                      # Postgres no Docker (porta 5433)
 pnpm --filter @guardiao/api db:generate
 pnpm --filter @guardiao/api db:migrate
 pnpm dev                        # api :3000, web :5173, pitch :5174
-pnpm test && pnpm typecheck
+pnpm test && pnpm typecheck     # os testes da API usam o banco guardiao_teste (precisa do db:up)
 pnpm avaliar                    # mede o motor nos 30 casos (--so-regras dispensa a chave)
 ```
 
@@ -69,7 +69,7 @@ pnpm avaliar                    # mede o motor nos 30 casos (--so-regras dispens
 - [x] D1: primeira migração, deploy vazio (Vercel + Railway) com `/saude` respondendo
 - [ ] D2: motor (normalização, regras, LLM, fusão) + script de avaliação no CI
 - [x] D3: telas do protegido (início, análise, resultados) com acessibilidade
-- [ ] D4: família, convite por QR, alertas em tempo real, push e escalonamento
+- [x] D4: família, convite por QR, alertas em tempo real, push e escalonamento
 - [ ] D5: Pix + CNPJ, treino, "Já paguei"; medição ampliada; teste de carga com 300 conexões
 - [ ] D6: congelar funcionalidades; esqueleto do pitch; vídeo de backup
 - [ ] D7: cenas 3D, modo leve, PDF; ensaios

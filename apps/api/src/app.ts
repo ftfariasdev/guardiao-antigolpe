@@ -2,18 +2,23 @@ import Fastify, { type FastifyError, type FastifyInstance } from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
+import type { PrismaClient } from "@prisma/client";
 import type { Config } from "./config.js";
 import type { DependenciasMotor } from "./motor/index.js";
+import { rotasAlertas } from "./rotas/alertas.js";
 import { rotasAnalises } from "./rotas/analises.js";
-import { rotasSaude, type VerificarBanco } from "./rotas/saude.js";
+import { rotasFamilias } from "./rotas/familias.js";
+import { rotasSaude } from "./rotas/saude.js";
+import type { Notificador } from "./tempo-real/notificador.js";
 
 export interface Dependencias {
   config: Config;
-  verificarBanco: VerificarBanco;
+  prisma: PrismaClient;
   motor: DependenciasMotor;
+  notificador: Notificador;
 }
 
-export async function criarApp({ config, verificarBanco, motor }: Dependencias): Promise<FastifyInstance> {
+export async function criarApp({ config, prisma, motor, notificador }: Dependencias): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
       level: config.NODE_ENV === "test" ? "silent" : "info",
@@ -23,12 +28,13 @@ export async function criarApp({ config, verificarBanco, motor }: Dependencias):
   });
 
   await app.register(helmet);
-  await app.register(cors, { origin: config.CORS_ORIGINS });
+  await app.register(cors, { origin: config.CORS_ORIGINS, methods: ["GET", "POST", "PUT", "PATCH"] });
   // Limite global generoso: a plateia do pitch divide o mesmo IP do Wi-Fi.
   await app.register(rateLimit, { max: 600, timeWindow: "1 minute" });
 
-  app.setErrorHandler<FastifyError>((erro, _req, res) => {
+  app.setErrorHandler<FastifyError>((erro, req, res) => {
     const status = erro.statusCode ?? 500;
+    if (status >= 500) req.log.error({ erro: erro.message }, "erro interno");
     res.status(status).send({
       erro: {
         codigo: erro.code ?? (status >= 500 ? "erro_interno" : "requisicao_invalida"),
@@ -37,7 +43,17 @@ export async function criarApp({ config, verificarBanco, motor }: Dependencias):
     });
   });
 
-  await app.register(rotasSaude(verificarBanco), { prefix: "/api/v1" });
-  await app.register(rotasAnalises(motor), { prefix: "/api/v1" });
+  const verificarBanco = async () => {
+    await prisma.$queryRaw`SELECT 1`;
+    return true;
+  };
+
+  const v1 = { prefix: "/api/v1" };
+  await app.register(rotasSaude(verificarBanco), v1);
+  await app.register(rotasFamilias(prisma), v1);
+  await app.register(rotasAnalises({ prisma, motor, notificador }), v1);
+  await app.register(rotasAlertas(prisma, notificador), v1);
+  // Chave pública do Web Push: o app precisa dela para pedir a inscrição ao navegador.
+  app.get("/api/v1/push/chave-publica", async () => ({ chave: config.VAPID_PUBLIC_KEY || null }));
   return app;
 }

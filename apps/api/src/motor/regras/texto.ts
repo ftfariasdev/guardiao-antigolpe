@@ -22,8 +22,11 @@ export interface RegraTexto {
   procurar: (normalizado: string) => Achado | null;
 }
 
-/** Trecho da mesma frase: qualquer coisa que não encerre a frase, até `max` caracteres. */
-const ate = (max: number) => `[^.!?\\n]{0,${max}}`;
+/**
+ * Trecho da mesma frase: qualquer coisa que não encerre a frase, até `max` caracteres.
+ * O ponto entre dois dígitos ("R$ 1.800") é separador de milhar, não fim de frase.
+ */
+const ate = (max: number) => `(?:[^.!?\\n]|(?<=\\d)\\.(?=\\d)){0,${max}}`;
 
 function porPadroes(...padroes: RegExp[]): RegraTexto["procurar"] {
   return (normalizado) => {

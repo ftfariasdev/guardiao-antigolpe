@@ -141,6 +141,9 @@ model Analise {
   tipoEntrada TipoEntrada @map("tipo_entrada")
   risco       Risco
   tipoGolpe   TipoGolpe   @map("tipo_golpe")
+  titulo      String      @default("")
+  /// valor pedido na mensagem ou no Pix, quando deu para identificar
+  valor       Float?
   sinais      Json
   acao        String
   confianca   Float

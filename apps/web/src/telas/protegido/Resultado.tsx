@@ -1,7 +1,7 @@
 import { semaforo, type AjustesAcessibilidade } from "@guardiao/brand";
 import type { ResultadoAnalise } from "@guardiao/shared";
 import { Cabecalho } from "../../componentes/Cabecalho";
-import { IconeAlerta, IconeCheck, IconeChave, IconeSom, IconeX } from "../../componentes/Icones";
+import { IconeAlerta, IconeCheck, IconeChave, IconeRelogio, IconeSom, IconeX } from "../../componentes/Icones";
 
 const ICONES = { check: IconeCheck, alerta: IconeAlerta, x: IconeX };
 const MOEDA = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -16,6 +16,44 @@ export function palavraDoRisco(r: ResultadoAnalise): string {
 /** Texto lido em voz alta e anunciado ao leitor de tela. */
 export function resumoFalado(r: ResultadoAnalise): string {
   return [palavraDoRisco(r), r.titulo, r.acao].join(". ").replace(/\.\./g, ".");
+}
+
+/** Frase dita quando o guardião responde. O desbloqueio vem do guardião, nunca do app. */
+export function falaDaResposta(r: ResultadoAnalise): string {
+  if (r.alerta?.resposta === "era_golpe") return `${r.alerta.guardiao} confirmou: era golpe. Não pague.`;
+  if (r.alerta?.resposta === "pode_seguir") return `Seu guardião verificou. ${r.alerta.guardiao} conferiu esta mensagem.`;
+  return "";
+}
+
+function EstadoDoAlerta({ alerta }: { alerta: NonNullable<ResultadoAnalise["alerta"]> }) {
+  if (alerta.resposta === "era_golpe") {
+    return (
+      <section className="semaforo semaforo--vermelho" role="status">
+        <div className="semaforo__topo">
+          <span className="semaforo__icone" aria-hidden="true"><IconeX /></span>
+          <h2 className="semaforo__palavra semaforo__palavra--menor">Era golpe</h2>
+        </div>
+        <p><strong>{alerta.guardiao}</strong> confirmou: era golpe. Não pague.</p>
+      </section>
+    );
+  }
+  if (alerta.resposta === "pode_seguir") {
+    return (
+      <section className="semaforo semaforo--verde" role="status">
+        <div className="semaforo__topo">
+          <span className="semaforo__icone" aria-hidden="true"><IconeCheck /></span>
+          <h2 className="semaforo__palavra semaforo__palavra--menor">Seu guardião verificou</h2>
+        </div>
+        <p><strong>{alerta.guardiao}</strong> conferiu esta mensagem. Se ficar em dúvida, fale de novo com {alerta.guardiao}.</p>
+      </section>
+    );
+  }
+  return (
+    <div className="cartao cartao--dica" role="status">
+      <span className="selo" aria-hidden="true"><IconeRelogio tamanho={22} /></span>
+      <p><strong>{alerta.guardiao} já recebeu o aviso.</strong><br /><span className="apoio">Aguardando a resposta. Não pague enquanto isso.</span></p>
+    </div>
+  );
 }
 
 /** O código Pix em si não é um "ponto de atenção": os dados dele já aparecem no cartão do Pix. */
@@ -33,31 +71,41 @@ export function Resultado({ resultado: r, ajustes, aoVoltar, aoOuvir, aoAbrirAce
   const Icone = ICONES[semaforo[r.risco].icone];
   const simples = ajustes.modoSimples;
   const sinais = r.sinais.filter((s) => s.trecho !== MARCADOR_PIX);
+  // Depois que o guardião confere, a resposta dele vem na frente; o aviso do app deixa de mandar.
+  const conferido = r.alerta?.resposta === "pode_seguir";
   const tituloSinais = r.risco === "vermelho" ? "Por que achamos isso" : "Pontos de atenção";
 
   return (
     <main className="tela">
       <Cabecalho aoAbrirAcessibilidade={aoAbrirAcessibilidade} />
 
-      <section className={`semaforo semaforo--${r.risco}`} aria-labelledby="resultado-titulo">
-        <div className="semaforo__topo">
-          <span className="semaforo__icone" aria-hidden="true"><Icone /></span>
-          <h1 id="resultado-titulo" className="semaforo__palavra" tabIndex={-1}>{palavraDoRisco(r)}</h1>
-        </div>
-        <p className="semaforo__frase">{r.titulo}</p>
-        {r.parcial && !/não consegui/i.test(r.titulo) && <p className="semaforo__nota">Não consegui conferir tudo agora. Por segurança, trate com cuidado.</p>}
-      </section>
+      {r.alerta?.resposta && <EstadoDoAlerta alerta={r.alerta} />}
 
-      <section className="cartao cartao--destaque" aria-labelledby="resultado-acao">
-        <h2 id="resultado-acao" className="subtitulo">O que fazer agora</h2>
-        <p>{r.acao}</p>
-        {r.sugerir_palavra_senha && !/palavra-senha/i.test(r.acao) && (
-          <p className="com-icone">
-            <span className="selo" aria-hidden="true"><IconeChave tamanho={22} /></span>
-            <span>Pergunte a <strong>palavra-senha da família</strong>. Só a sua família sabe.</span>
-          </p>
-        )}
-      </section>
+      {!conferido && (
+        <>
+          <section className={`semaforo semaforo--${r.risco}`} aria-labelledby="resultado-titulo">
+            <div className="semaforo__topo">
+              <span className="semaforo__icone" aria-hidden="true"><Icone /></span>
+              <h1 id="resultado-titulo" className="semaforo__palavra" tabIndex={-1}>{palavraDoRisco(r)}</h1>
+            </div>
+            <p className="semaforo__frase">{r.titulo}</p>
+            {r.parcial && !/não consegui/i.test(r.titulo) && <p className="semaforo__nota">Não consegui conferir tudo agora. Por segurança, trate com cuidado.</p>}
+          </section>
+
+          <section className="cartao cartao--destaque" aria-labelledby="resultado-acao">
+            <h2 id="resultado-acao" className="subtitulo">O que fazer agora</h2>
+            <p>{r.acao}</p>
+            {r.sugerir_palavra_senha && !/palavra-senha/i.test(r.acao) && (
+              <p className="com-icone">
+                <span className="selo" aria-hidden="true"><IconeChave tamanho={22} /></span>
+                <span>Pergunte a <strong>palavra-senha da família</strong>. Só a sua família sabe.</span>
+              </p>
+            )}
+          </section>
+        </>
+      )}
+
+      {r.alerta && !r.alerta.resposta && <EstadoDoAlerta alerta={r.alerta} />}
 
       {!simples && r.pix && (
         <section className="cartao" aria-labelledby="resultado-pix">

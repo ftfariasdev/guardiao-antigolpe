@@ -6,7 +6,8 @@ services:
       POSTGRES_PASSWORD: guardiao
       POSTGRES_DB: guardiao
     ports:
-      - "5432:5432"
+      # 5433 no computador, para não disputar a 5432 com outro Postgres local.
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 volumes:

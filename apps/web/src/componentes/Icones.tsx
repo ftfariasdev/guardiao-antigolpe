@@ -18,6 +18,9 @@ export const IconeSom = (p: Props) => <Traco {...p}><path d="M11 5 6 9H2v6h4l5 4
 export const IconeVoltar = (p: Props) => <Traco grosso={2.5} {...p}><path d="m15 18-6-6 6-6" /></Traco>;
 export const IconeCompartilhar = (p: Props) => <Traco {...p}><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4" /></Traco>;
 export const IconeChave = (p: Props) => <Traco {...p}><circle cx="7.5" cy="15.5" r="4.5" /><path d="m10.7 12.3 9.3-9.3M17 6l3 3M14 9l2 2" /></Traco>;
+export const IconeConvidar = (p: Props) => <Traco {...p}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M19 8v6M22 11h-6" /></Traco>;
+export const IconeRelogio = (p: Props) => <Traco {...p}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></Traco>;
+export const IconeSino = (p: Props) => <Traco {...p}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0" /></Traco>;
 export const IconeCheck = (p: Props) => <Traco grosso={3} {...p}><path d="M20 6 9 17l-5-5" /></Traco>;
 export const IconeAlerta = (p: Props) => <Traco grosso={3} {...p}><path d="M12 6v8M12 18.5v.01" /></Traco>;
 export const IconeX = (p: Props) => <Traco grosso={3} {...p}><path d="M18 6 6 18M6 6l12 12" /></Traco>;

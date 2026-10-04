@@ -27,12 +27,20 @@ export interface DependenciasMotor {
 
 export interface ResultadoMotor extends ResultadoFusao {
   pix: DadosPix | null;
+  /** Valor pedido: o do Pix ou o primeiro "R$" citado na mensagem. Vai no alerta ao guardião. */
+  valor: number | null;
   latencia_ms: number;
   /** Por que o LLM não entrou no resultado; nunca traz conteúdo da mensagem. */
   falha_llm: "sem_provedor" | "tempo_esgotado" | "erro" | "resposta_invalida" | null;
 }
 
 const MARCADOR_PIX = "[CÓDIGO PIX]";
+
+function valorCitado(normalizado: string): number | null {
+  const m = /r\$ ?(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d{2}))?/.exec(normalizado);
+  if (!m) return null;
+  return Number(`${(m[1] as string).replace(/\./g, "")}.${m[2] ?? "00"}`);
+}
 
 function separarPix(texto: string): { semCodigo: string; dados: DadosBRCode | null } {
   const codigo = extrairBRCode(texto);
@@ -141,7 +149,8 @@ export async function analisar(entrada: EntradaMotor, deps: DependenciasMotor): 
     cnpj: cnpj && { razao_social: cnpj.razao_social, data_abertura: cnpj.data_abertura, situacao: cnpj.situacao },
   };
 
-  return { ...fusao, pix, latencia_ms: Math.round(performance.now() - inicio), falha_llm };
+  const valor = dados?.valor ?? valorCitado(texto.normalizado);
+  return { ...fusao, pix, valor, latencia_ms: Math.round(performance.now() - inicio), falha_llm };
 }
 
 export type { ImagemEntrada, ProvedorLLM } from "./llm/provedor.js";

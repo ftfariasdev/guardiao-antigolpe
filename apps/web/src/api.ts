@@ -1,15 +1,65 @@
-import { ResultadoAnalise } from "@guardiao/shared";
+import {
+  AlertaDetalhe,
+  ConviteCriado,
+  DadosSessao,
+  ItemHistorico,
+  ResultadoAnalise,
+  SessaoCriada,
+  type AceitarConvite,
+  type CriarFamilia,
+  type InscricaoPush,
+  type Papel,
+  type RespostaAlerta,
+} from "@guardiao/shared";
+import { z } from "zod";
 
-const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+export const BASE_API = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
-/** A tela mostra o resultado ou um aviso de cautela; nunca um verde que a API não deu. */
-export async function analisarMensagem(texto: string, sinal: AbortSignal): Promise<ResultadoAnalise> {
-  const resposta = await fetch(`${BASE}/api/v1/analises`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ tipo_entrada: "texto", texto }),
+export class ErroApi extends Error {
+  constructor(
+    public status: number,
+    public codigo: string,
+    mensagem: string,
+  ) {
+    super(mensagem);
+  }
+}
+
+interface Opcoes {
+  token?: string;
+  corpo?: object;
+  sinal?: AbortSignal;
+}
+
+async function pedir<T>(metodo: string, caminho: string, esquema: z.ZodType<T, z.ZodTypeDef, unknown> | null, { token, corpo, sinal }: Opcoes = {}): Promise<T> {
+  const resposta = await fetch(`${BASE_API}/api/v1${caminho}`, {
+    method: metodo,
+    headers: { ...(corpo ? { "content-type": "application/json" } : {}), ...(token ? { authorization: `Bearer ${token}` } : {}) },
+    body: corpo ? JSON.stringify(corpo) : undefined,
     signal: sinal,
   });
-  if (!resposta.ok) throw new Error(`api_${resposta.status}`);
-  return ResultadoAnalise.parse(await resposta.json());
+  if (!resposta.ok) {
+    const erro = (await resposta.json().catch(() => null)) as { erro?: { codigo?: string; mensagem?: string } } | null;
+    throw new ErroApi(resposta.status, erro?.erro?.codigo ?? "erro", erro?.erro?.mensagem ?? "Algo deu errado. Tente de novo.");
+  }
+  if (!esquema) return undefined as T;
+  return esquema.parse(await resposta.json());
 }
+
+export const api = {
+  criarFamilia: (dados: CriarFamilia) => pedir("POST", "/familias", SessaoCriada, { corpo: dados }),
+  aceitarConvite: (convite: string, dados: AceitarConvite) => pedir("POST", `/convites/${encodeURIComponent(convite)}/aceitar`, SessaoCriada, { corpo: dados }),
+  sessao: (token: string) => pedir("GET", "/sessao", DadosSessao, { token }),
+  criarConvite: (token: string, familiaId: string, papel: Papel) => pedir("POST", `/familias/${familiaId}/convites`, ConviteCriado, { token, corpo: { papel } }),
+  definirPalavraSenha: (token: string, familiaId: string, palavra: string) => pedir("PUT", `/familias/${familiaId}/palavra-senha`, null, { token, corpo: { palavra } }),
+  inscreverPush: (token: string, membroId: string, inscricao: InscricaoPush | null) => pedir("PATCH", `/membros/${membroId}`, DadosSessao, { token, corpo: { push_subscription: inscricao } }),
+  chavePush: () => pedir("GET", "/push/chave-publica", z.object({ chave: z.string().nullable() })),
+  /** A tela mostra o resultado ou um aviso de cautela; nunca um verde que a API não deu. */
+  analisar: (token: string, texto: string, sinal: AbortSignal) => pedir("POST", "/analises", ResultadoAnalise, { token, corpo: { tipo_entrada: "texto", texto }, sinal }),
+  analise: (token: string, id: string) => pedir("GET", `/analises/${id}`, ResultadoAnalise, { token }),
+  historico: (token: string, familiaId: string) => pedir("GET", `/familias/${familiaId}/historico?limite=5`, z.object({ itens: z.array(ItemHistorico) }), { token }),
+  alertasPendentes: (token: string) => pedir("GET", "/alertas/pendentes", z.object({ itens: z.array(AlertaDetalhe) }), { token }),
+  alerta: (token: string, id: string) => pedir("GET", `/alertas/${id}`, AlertaDetalhe, { token }),
+  marcarVisto: (token: string, id: string) => pedir("POST", `/alertas/${id}/visto`, AlertaDetalhe, { token }),
+  responder: (token: string, id: string, resposta: RespostaAlerta) => pedir("POST", `/alertas/${id}/responder`, AlertaDetalhe, { token, corpo: { resposta } }),
+};

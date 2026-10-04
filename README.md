@@ -19,6 +19,16 @@ pnpm dev
 - API: http://localhost:3000/api/v1/saude
 - Pitch: http://localhost:5174
 
+## Motor de análise
+
+```bash
+pnpm test                   # inclui um teste por regra do motor
+pnpm avaliar --so-regras    # mede os 30 casos só com as regras
+pnpm avaliar                # motor completo; precisa de ANTHROPIC_API_KEY no .env
+```
+
+Detalhes em [avaliacao/README.md](./avaliacao/README.md).
+
 ## Produção
 
 - App: https://guardiao-antigolpe.vercel.app

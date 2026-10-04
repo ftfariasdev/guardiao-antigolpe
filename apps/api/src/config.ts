@@ -20,6 +20,7 @@ const Esquema = z.object({
     .default("http://localhost:5173")
     .transform((v) => v.split(",").map((s) => s.trim()).filter(Boolean)),
   DEMO_MODE: booleano,
+  LLM_MODEL: z.string().default("claude-opus-5-5"),
   LLM_TIMEOUT_MS: z.coerce.number().int().positive().default(8000),
   ESCALONAMENTO_MIN: z.coerce.number().int().positive().default(5),
 });

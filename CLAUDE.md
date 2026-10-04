@@ -39,6 +39,7 @@ pnpm --filter @guardiao/api db:generate
 pnpm --filter @guardiao/api db:migrate
 pnpm dev                        # api :3000, web :5173, pitch :5174
 pnpm test && pnpm typecheck
+pnpm avaliar                    # mede o motor nos 30 casos (--so-regras dispensa a chave)
 ```
 
 ## Regras que nunca podem ser quebradas

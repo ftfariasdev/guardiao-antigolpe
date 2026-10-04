@@ -1,0 +1,39 @@
+name: Avaliação do motor
+
+# Toda mudança no motor (regras, prompt, exemplos) ou nos casos roda a medição com o LLM.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/api/src/motor/**"
+      - "apps/api/src/avaliacao/**"
+      - "avaliacao/**"
+      - "packages/shared/**"
+      - "packages/brcode/**"
+  pull_request:
+    paths:
+      - "apps/api/src/motor/**"
+      - "apps/api/src/avaliacao/**"
+      - "avaliacao/**"
+  workflow_dispatch:
+
+jobs:
+  medir:
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      LLM_MODEL: ${{ vars.LLM_MODEL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Avaliação completa (regras + LLM)
+        if: env.ANTHROPIC_API_KEY != ''
+        run: pnpm avaliar
+      - name: Sem chave configurada
+        if: env.ANTHROPIC_API_KEY == ''
+        run: echo "::warning::Secret ANTHROPIC_API_KEY ausente - a avaliação com o LLM não rodou."

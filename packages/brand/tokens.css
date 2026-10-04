@@ -72,11 +72,14 @@ html { font-family: var(--fonte-texto); font-size: var(--texto-corpo); color: va
 /* ===== Acessibilidade =====
    Aplicados no <html> pelos ajustes do usuário (salvos no aparelho e no cadastro). */
 
+/* Padrões. Ficam antes dos ajustes: com a mesma especificidade, vale a regra que vem depois. */
+:root { --escala-texto: 1; }
+:root { --entrelinha: 1.45; --espaco-letras: normal; --largura-borda: 2px; --cor-borda: #C9D3EA; }
+
 /* Tamanho do texto: 100% é o padrão; soma-se ao tamanho de fonte do sistema. */
 [data-texto="125"] { --escala-texto: 1.25; }
 [data-texto="150"] { --escala-texto: 1.5; }
 [data-texto="175"] { --escala-texto: 1.75; }
-:root { --escala-texto: 1; }
 html { font-size: calc(var(--texto-corpo) * var(--escala-texto)); }
 
 /* Alto contraste: preto, branco e amarelo, contraste mínimo de 7:1 (WCAG AAA). */
@@ -97,7 +100,6 @@ html { font-size: calc(var(--texto-corpo) * var(--escala-texto)); }
 
 /* Mais espaço entre linhas e letras. */
 [data-espaco="amplo"] { --entrelinha: 1.8; --espaco-letras: 0.04em; }
-:root { --entrelinha: 1.45; --espaco-letras: normal; --largura-borda: 2px; --cor-borda: #C9D3EA; }
 body { line-height: var(--entrelinha); letter-spacing: var(--espaco-letras); }
 
 /* Reduzir animações: pelo ajuste do app ou pela preferência do sistema. */

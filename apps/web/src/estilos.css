@@ -1,0 +1,132 @@
+/* Telas do app. Cores, fontes e ajustes de acessibilidade vêm de tokens.css;
+   o texto é em rem e acompanha o tamanho escolhido (1rem = 20 px no padrão); espaços e ícones são fixos
+   e os títulos têm teto, para o texto grande caber na tela do celular. */
+
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; min-height: 100dvh; background: var(--cor-fundo); }
+h1, h2, p, ul, ol, dl, dd { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+button, textarea { font: inherit; letter-spacing: inherit; color: inherit; }
+button { cursor: pointer; }
+h1:focus { outline: none; } /* o título recebe o foco só para o leitor de tela */
+
+.so-leitor { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ---------- Estrutura ---------- */
+.tela { max-width: 480px; min-height: 100dvh; margin: 0 auto; padding: 24px 24px calc(32px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 24px; }
+.bloco { display: flex; flex-direction: column; gap: 12px; }
+.bloco--cresce { flex: 1; }
+.bloco--centro { align-items: center; text-align: center; gap: 20px; padding-top: 24px; }
+
+.cabecalho { display: flex; align-items: center; gap: 10px; }
+.cabecalho__nome { font-family: var(--fonte-titulo); font-weight: 600; font-size: min(1.1rem, 28px); }
+.cabecalho__acoes { margin-left: auto; display: flex; gap: 10px; }
+
+.titulo { font-family: var(--fonte-titulo); font-weight: 600; font-size: min(1.6rem, 40px); line-height: 1.15; overflow-wrap: break-word; }
+.titulo--menor { font-size: min(1.4rem, 36px); }
+.subtitulo { font-family: var(--fonte-titulo); font-weight: 600; font-size: max(1rem, min(1.05rem, 30px)); line-height: 1.25; }
+.apoio { color: var(--cor-texto-secundario); }
+.rotulo { font-weight: 700; }
+
+/* ---------- Botões ---------- */
+.botao { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: max(3rem, var(--alvo-toque)); padding: 10px 20px; border-radius: 18px; font-weight: 700; font-size: 1.05rem; line-height: 1.2; text-align: center; transition: transform var(--duracao-curta) var(--curva-padrao); }
+.botao:active { transform: scale(0.98); }
+.botao--grande { min-height: 3.6rem; font-size: 1.1rem; }
+.botao--principal { border: var(--largura-borda) solid var(--cor-marca); background: var(--cor-marca); color: var(--cor-sobre-marca); }
+.botao--secundario { border: var(--largura-borda) solid var(--cor-borda); background: var(--cor-superficie); color: var(--cor-texto); }
+.botao--secundario svg { color: var(--cor-marca); }
+.botao--fim { margin-top: auto; }
+.botao-redondo { flex: none; display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: var(--raio-pilula); border: var(--largura-borda) solid transparent; background: var(--cor-superficie); color: var(--cor-marca); }
+[data-contraste="alto"] .botao-redondo { border-color: var(--cor-marca); }
+
+/* ---------- Cartões ---------- */
+.cartao { display: flex; flex-direction: column; gap: 12px; padding: 18px 20px; background: var(--cor-superficie); border: var(--largura-borda) solid transparent; border-radius: var(--raio-medio); }
+[data-contraste="alto"] .cartao { border-color: var(--cor-borda); }
+.cartao--destaque { border-color: var(--cor-marca); }
+[data-contraste="alto"] .cartao--destaque { border-color: var(--cor-marca); }
+.cartao--dica { flex-direction: row; align-items: flex-start; gap: 14px; }
+.selo { flex: none; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: var(--raio-pilula); background: var(--cor-fundo); color: var(--cor-marca); }
+.com-icone { display: flex; align-items: flex-start; gap: 14px; }
+
+/* ---------- Campo de texto ---------- */
+.campo { width: 100%; min-height: 9rem; padding: 16px; border: var(--largura-borda) solid var(--cor-borda); border-radius: var(--raio-medio); background: var(--cor-superficie); color: var(--cor-texto); line-height: var(--entrelinha); resize: vertical; }
+.campo::placeholder { color: var(--cor-texto-secundario); opacity: 1; }
+
+/* ---------- Semáforo: sempre ícone + palavra, nunca só cor ---------- */
+.semaforo { display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 20px; border: var(--largura-borda) solid transparent; }
+.semaforo__topo { display: flex; align-items: center; gap: 14px; }
+.semaforo__icone { flex: none; display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: var(--raio-pilula); color: var(--cor-superficie); }
+.semaforo__palavra { font-family: var(--fonte-titulo); font-weight: 700; font-size: min(1.5rem, 40px); line-height: 1.1; overflow-wrap: break-word; min-width: 0; }
+.semaforo__frase { line-height: 1.35; }
+.semaforo__nota { color: var(--cor-texto-secundario); }
+.semaforo--verde { background: var(--risco-verde-fundo); }
+.semaforo--verde .semaforo__palavra { color: var(--risco-verde); }
+.semaforo--verde .semaforo__icone { background: var(--risco-verde); }
+.semaforo--amarelo { background: var(--risco-ambar-fundo); }
+.semaforo--amarelo .semaforo__palavra { color: var(--risco-ambar); }
+.semaforo--amarelo .semaforo__icone { background: var(--risco-ambar); }
+.semaforo--vermelho { background: var(--risco-vermelho-fundo); }
+.semaforo--vermelho .semaforo__palavra { color: var(--risco-vermelho); }
+.semaforo--vermelho .semaforo__icone { background: var(--risco-vermelho); }
+[data-contraste="alto"] .semaforo--verde { border-color: var(--risco-verde); }
+[data-contraste="alto"] .semaforo--amarelo { border-color: var(--risco-ambar); }
+[data-contraste="alto"] .semaforo--vermelho { border-color: var(--risco-vermelho); }
+
+/* ---------- Sinais e dados do Pix ---------- */
+.sinais { display: flex; flex-direction: column; gap: 14px; }
+.sinais li + li { padding-top: 14px; border-top: 1px solid var(--cor-borda); }
+.sinais__trecho { font-weight: 700; overflow-wrap: anywhere; }
+.dados { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 10px 16px; }
+.dados dt { color: var(--cor-texto-secundario); }
+.dados dd { overflow-wrap: anywhere; }
+
+/* ---------- Análise em andamento ---------- */
+.etapas { gap: 16px; }
+.etapa { display: flex; align-items: center; gap: 14px; }
+.etapa[hidden] { display: none; }
+.etapa--atual { font-weight: 700; }
+.etapa__marca { flex: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--raio-pilula); border: 3px solid var(--cor-marca); color: var(--cor-sobre-marca); }
+.etapa__marca--feita { background: var(--cor-marca); }
+.etapa__ponto { width: 10px; height: 10px; border-radius: var(--raio-pilula); background: var(--cor-marca); }
+
+.escudo__corpo { fill: var(--cor-marca); }
+.escudo__ponto { fill: var(--cor-sobre-marca); }
+.escudo__ponto--3 { fill: var(--ciano); }
+[data-contraste="alto"] .escudo__corpo { fill: var(--cor-texto); }
+[data-contraste="alto"] .escudo__ponto { fill: var(--cor-fundo); }
+@keyframes pulsar { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.escudo--pensando .escudo__ponto { animation: pulsar 1.2s var(--curva-padrao) infinite; }
+.escudo--pensando .escudo__ponto--2 { animation-delay: 0.2s; }
+.escudo--pensando .escudo__ponto--3 { animation-delay: 0.4s; }
+[data-movimento="reduzido"] .escudo--pensando .escudo__ponto { animation: none; }
+[data-movimento="reduzido"] .botao:active { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .escudo--pensando .escudo__ponto { animation: none; }
+  .botao:active { transform: none; }
+}
+
+/* ---------- Acessibilidade ---------- */
+.amostra { gap: 4px; }
+.niveis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.nivel { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: max(3.2rem, var(--alvo-toque)); padding: 4px; border: var(--largura-borda) solid var(--cor-borda); border-radius: 14px; background: var(--cor-superficie); color: var(--cor-texto); }
+.nivel[aria-pressed="true"] { background: var(--cor-marca); border-color: var(--cor-marca); color: var(--cor-sobre-marca); }
+.nivel__letra { font-weight: 700; line-height: 1; }
+.nivel__rotulo { font-size: 1rem; line-height: 1.1; }
+.chaves { display: flex; flex-direction: column; }
+.chave { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--cor-borda); }
+.chave__texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.chave__botao { flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: max(3.6rem, var(--alvo-toque)); min-height: max(2.8rem, var(--alvo-toque)); padding: 4px; border: 0; background: transparent; }
+.chave__trilho { display: flex; align-items: center; width: 56px; height: 32px; padding: 2px; border-radius: var(--raio-pilula); border: var(--largura-borda) solid var(--cor-texto-secundario); background: var(--cor-texto-secundario); transition: background var(--duracao-curta) var(--curva-padrao); }
+.chave__pino { width: 22px; height: 22px; border-radius: var(--raio-pilula); background: var(--cor-superficie); transition: transform var(--duracao-curta) var(--curva-padrao); }
+.chave__botao[aria-checked="true"] .chave__trilho { background: var(--cor-marca); border-color: var(--cor-marca); }
+.chave__botao[aria-checked="true"] .chave__pino { transform: translateX(23px); }
+.chave__estado { font-weight: 700; }
+
+/* Com texto grande, o que ficava lado a lado passa a empilhar para nada cortar. */
+[data-texto="150"] .niveis, [data-texto="175"] .niveis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+[data-texto="150"] .chave, [data-texto="175"] .chave { flex-direction: column; align-items: flex-start; }
+[data-texto="150"] .chave__botao, [data-texto="175"] .chave__botao { flex-direction: row; gap: 10px; }
+[data-texto="150"] .dados, [data-texto="175"] .dados { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+[data-texto="150"] .dados dd, [data-texto="175"] .dados dd { margin-bottom: 10px; }
+[data-texto="150"] .semaforo__topo, [data-texto="175"] .semaforo__topo { flex-direction: column; align-items: flex-start; }
+[data-texto="150"] .cartao--dica, [data-texto="175"] .cartao--dica, [data-texto="150"] .com-icone, [data-texto="175"] .com-icone { flex-direction: column; }

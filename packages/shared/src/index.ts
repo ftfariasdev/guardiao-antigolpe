@@ -83,6 +83,16 @@ export const ResultadoAnalise = z.object({
 });
 export type ResultadoAnalise = z.infer<typeof ResultadoAnalise>;
 
+/**
+ * Corpo de POST /analises enquanto a rota só recebe texto (mensagem colada, link ou Pix copia e cola).
+ * Print e áudio entram como multipart junto com OCR e transcrição.
+ */
+export const PedidoAnalise = z.object({
+  tipo_entrada: TipoEntrada.default("texto"),
+  texto: z.string().trim().min(1).max(5000),
+});
+export type PedidoAnalise = z.infer<typeof PedidoAnalise>;
+
 /** Entrada da ferramenta registrar_analise que o LLM chama. */
 export const SaidaLLM = z.object({
   risco: NivelRisco,

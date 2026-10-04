@@ -88,7 +88,8 @@ export const REGRAS_TEXTO: RegraTexto[] = [
       /\bate (?:as |a )?\d{1,2}(?: ?h(?:oras)?|:\d{2})\b/,
       /\b(?:vence|expira|so|somente|apenas|pague|pagar|ainda) hoje\b/,
       /\b(?:urgente|urgencia|imediatamente|o quanto antes|com urgencia)\b/,
-      /\b(?:agora|hoje)\b/,
+      // Leva junto as palavras anteriores, para o trecho mostrado fazer sentido sozinho.
+      /(?:\b[\w$]+ ){0,3}\b(?:agora|hoje)\b/,
     ),
   },
   {

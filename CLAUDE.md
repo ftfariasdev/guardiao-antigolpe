@@ -68,7 +68,7 @@ pnpm avaliar                    # mede o motor nos 30 casos (--so-regras dispens
 - [x] D1: monorepo, tokens, schemas compartilhados, parser do Pix, `/api/v1/saude`, schema do Prisma
 - [x] D1: primeira migração, deploy vazio (Vercel + Railway) com `/saude` respondendo
 - [ ] D2: motor (normalização, regras, LLM, fusão) + script de avaliação no CI
-- [ ] D3: telas do protegido (início, análise, resultados) com acessibilidade
+- [x] D3: telas do protegido (início, análise, resultados) com acessibilidade
 - [ ] D4: família, convite por QR, alertas em tempo real, push e escalonamento
 - [ ] D5: Pix + CNPJ, treino, "Já paguei"; medição ampliada; teste de carga com 300 conexões
 - [ ] D6: congelar funcionalidades; esqueleto do pitch; vídeo de backup

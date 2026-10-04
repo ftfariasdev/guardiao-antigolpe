@@ -3,14 +3,17 @@ import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import type { Config } from "./config.js";
+import type { DependenciasMotor } from "./motor/index.js";
+import { rotasAnalises } from "./rotas/analises.js";
 import { rotasSaude, type VerificarBanco } from "./rotas/saude.js";
 
 export interface Dependencias {
   config: Config;
   verificarBanco: VerificarBanco;
+  motor: DependenciasMotor;
 }
 
-export async function criarApp({ config, verificarBanco }: Dependencias): Promise<FastifyInstance> {
+export async function criarApp({ config, verificarBanco, motor }: Dependencias): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
       level: config.NODE_ENV === "test" ? "silent" : "info",
@@ -35,5 +38,6 @@ export async function criarApp({ config, verificarBanco }: Dependencias): Promis
   });
 
   await app.register(rotasSaude(verificarBanco), { prefix: "/api/v1" });
+  await app.register(rotasAnalises(motor), { prefix: "/api/v1" });
   return app;
 }

@@ -6,6 +6,7 @@ import {
   ModeloTreino,
   ResultadoAnalise,
   SessaoCriada,
+  SessaoPitch,
   TreinoDetalhe,
   type AceitarConvite,
   type CriarFamilia,
@@ -59,6 +60,9 @@ export const api = {
   chavePush: () => pedir("GET", "/push/chave-publica", z.object({ chave: z.string().nullable() })),
   /** A tela mostra o resultado ou um aviso de cautela; nunca um verde que a API não deu. */
   analisar: (token: string, texto: string, tipo: TipoEntrada, sinal: AbortSignal) => pedir("POST", "/analises", ResultadoAnalise, { token, corpo: { tipo_entrada: tipo, texto }, sinal }),
+  sessaoPitchAtual: () => pedir("GET", "/pitch/sessoes/atual", SessaoPitch),
+  sessaoPitch: (id: string) => pedir("GET", `/pitch/sessoes/${id}`, SessaoPitch),
+  eventoPitch: (id: string, visitante_id: string, tipo: "acessou" | "confirmou") => pedir("POST", `/pitch/sessoes/${id}/eventos`, null, { corpo: { visitante_id, tipo } }),
   modelosDeTreino: (token: string) => pedir("GET", "/treinos/modelos", z.object({ itens: z.array(ModeloTreino) }), { token }),
   enviarTreino: (token: string, modelo: string) => pedir("POST", "/treinos", TreinoDetalhe, { token, corpo: { modelo } }),
   treinos: (token: string) => pedir("GET", "/treinos", z.object({ itens: z.array(TreinoDetalhe) }), { token }),

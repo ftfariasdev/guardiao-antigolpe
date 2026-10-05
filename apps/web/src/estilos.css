@@ -173,3 +173,28 @@ h1:focus { outline: none; } /* o título recebe o foco só para o leitor de tela
 .campo--escolha { min-height: max(2.8rem, var(--alvo-toque)); padding: 8px 12px; }
 [data-texto="150"] .passo, [data-texto="175"] .passo { flex-direction: column; }
 .cartao--botao { width: 100%; text-align: left; align-items: flex-start; }
+
+/* ---------- Golpe simulado do pitch ----------
+   A isca usa cores de fora da marca de propósito: precisa parecer um aviso comum de evento. */
+.isca { background: #FFFFFF; color: #1A1A1A; font-family: system-ui, sans-serif; max-width: none; padding-left: max(24px, calc(50% - 216px)); padding-right: max(24px, calc(50% - 216px)); }
+.isca__marca { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+.isca__icone { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: #C8006C; color: #FFFFFF; }
+.isca__selo { align-self: flex-start; padding: 6px 14px; border-radius: var(--raio-pilula); background: #FFE3F1; color: #A3005A; font-weight: 700; font-size: 0.8rem; }
+.isca__titulo { font-size: min(1.7rem, 40px); line-height: 1.1; font-weight: 800; }
+.isca__texto { color: #4D4D4D; }
+.isca__urgencia { display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; border-radius: 14px; background: #FFF4E5; color: #7A4100; }
+.isca__urgencia p:first-child { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.isca__barra { height: 12px; border-radius: 6px; overflow: hidden; background: #FFE0B8; }
+.isca__barra span { display: block; width: 70%; height: 100%; background: #C25E00; }
+.isca__chave { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border: 2px solid #EDEDED; border-radius: 14px; color: #1A1A1A; }
+.isca__chave svg { color: #1F7A3D; flex: none; }
+.isca__botao { min-height: 68px; border: 0; border-radius: 18px; background: #C8006C; color: #FFFFFF; font-size: 1.1rem; font-weight: 800; }
+.isca__letrinha { color: #6B6B6B; font-size: 0.75rem; text-align: center; }
+.revelacao .cartao { background: var(--cor-superficie); }
+.revelacao__acento { color: var(--cor-acento); }
+.revelacao__numero { flex: none; font-family: var(--fonte-titulo); font-weight: 700; color: var(--cor-acento); }
+.revelacao__marca { font-family: var(--fonte-titulo); font-weight: 600; }
+.revelacao .botao-redondo { color: var(--cor-acento); }
+
+/* Folha de compartilhar da conversa de demonstração: presa ao pé da tela, como no celular. */
+.folha { position: fixed; left: 0; right: 0; bottom: 0; z-index: 2; border-radius: var(--raio-medio) var(--raio-medio) 0 0; padding-bottom: calc(20px + env(safe-area-inset-bottom)); box-shadow: 0 -8px 24px rgb(14 26 61 / 0.25); }

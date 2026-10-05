@@ -9,6 +9,8 @@ interface Props {
   treino: TreinoDetalhe | null;
   aoColar: () => void;
   aoLerQr: () => void;
+  /** Só nos perfis de demonstração do pitch. */
+  aoAbrirConversa?: () => void;
   aoAbrirTreino: () => void;
   aoAbrirAcessibilidade: () => void;
   aoOuvir: (texto: string) => void;
@@ -16,7 +18,7 @@ interface Props {
 
 const CHAMADA = "Recebeu algo estranho? Mostre para o Guardião antes de pagar.";
 
-export function Inicio({ sessao, treino, aoColar, aoLerQr, aoAbrirTreino, aoAbrirAcessibilidade, aoOuvir }: Props) {
+export function Inicio({ sessao, treino, aoColar, aoLerQr, aoAbrirConversa, aoAbrirTreino, aoAbrirAcessibilidade, aoOuvir }: Props) {
   const SAUDACAO = `Olá, ${sessao.membro.nome}`;
   const guardioes = sessao.familia.membros.filter((m) => m.papel === "guardiao");
   return (
@@ -34,6 +36,9 @@ export function Inicio({ sessao, treino, aoColar, aoLerQr, aoAbrirTreino, aoAbri
         <IconeQr />
         Ler QR Code do Pix
       </button>
+      {aoAbrirConversa && (
+        <button type="button" className="botao botao--secundario" onClick={aoAbrirConversa}>Abrir mensagens (demonstração)</button>
+      )}
       {treino && (
         <button type="button" className="cartao cartao--destaque cartao--botao" onClick={aoAbrirTreino}>
           <span className="com-icone"><Escudo largura={26} /><strong>{treino.enviado_por} mandou um treino</strong></span>

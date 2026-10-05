@@ -46,6 +46,13 @@ export const rotasPitch =
       return res.status(201).send(await resumo(sessao.id));
     });
 
+    /** Sessão mais recente: é o que deixa o link lido em voz alta ser curto (…/#pitch). */
+    app.get("/pitch/sessoes/atual", async () => {
+      const sessao = await prisma.pitchSessao.findFirst({ where: { status: { not: "encerrada" } }, orderBy: { criadoEm: "desc" } });
+      if (!sessao) throw new ErroHttp(404, "nao_encontrado", "Nenhuma sessão aberta.");
+      return resumo(sessao.id);
+    });
+
     app.get<{ Params: { id: string } }>("/pitch/sessoes/:id", async (req) => resumo(req.params.id));
 
     app.post<{ Params: { id: string } }>(

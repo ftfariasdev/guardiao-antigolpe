@@ -44,7 +44,7 @@ async function subir() {
   };
   const entrarNoPitch = (sessao: string) =>
     new Promise<Socket>((resolver, rejeitar) => {
-      const s = conectar(`${base}/pitch`, { query: { sessao }, transports: ["websocket"], reconnection: false });
+      const s = conectar(`${base}/pitch`, { auth: { sessao }, transports: ["websocket"], reconnection: false });
       abertos.push(s);
       s.once("connect", () => resolver(s));
       s.once("connect_error", rejeitar);
@@ -104,6 +104,8 @@ describe("golpe simulado do pitch (/pitch)", () => {
     const placares: { acessaram: number; confirmaram: number }[] = [];
     painel.on("pitch:contador", (p) => placares.push(p));
 
+    // O link curto do slide 1 (…/#pitch) descobre a sessão por aqui.
+    expect((await app.inject({ method: "GET", url: "/api/v1/pitch/sessoes/atual" })).json()).toMatchObject({ id: sessao.id, status: "aberta" });
     expect((await evento(app, sessao.id, "visitante-0001", "acessou")).json()).toEqual({ registrado: true });
     expect((await evento(app, sessao.id, "visitante-0001", "acessou")).json()).toEqual({ registrado: false });
     await evento(app, sessao.id, "visitante-0002", "acessou");

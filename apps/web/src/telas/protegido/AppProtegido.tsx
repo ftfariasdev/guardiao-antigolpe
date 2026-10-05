@@ -8,6 +8,8 @@ import { Acessibilidade } from "./Acessibilidade";
 import { Analisando } from "./Analisando";
 import { Escrever } from "./Escrever";
 import { FALA_FALHA, Falha } from "./Falha";
+import { PERFIL } from "../../perfil";
+import { ConversaDemo } from "./ConversaDemo";
 import { Inicio } from "./Inicio";
 import { JaPaguei } from "./JaPaguei";
 import { LerQr } from "./LerQr";
@@ -15,10 +17,10 @@ import { Treino } from "./Treino";
 import { falaDaResposta, Resultado, resumoFalado } from "./Resultado";
 import { calar, falar } from "../../voz";
 
-type Tela = "inicio" | "escrever" | "qr" | "analisando" | "resultado" | "falha" | "acessibilidade" | "ja-paguei" | "treino";
+type Tela = "inicio" | "escrever" | "qr" | "analisando" | "resultado" | "falha" | "acessibilidade" | "ja-paguei" | "treino" | "conversa";
 
 /** Telas que o botão Voltar do celular alcança; análise e resultado não entram no histórico. */
-const NAVEGAVEIS: Tela[] = ["inicio", "escrever", "qr", "acessibilidade", "ja-paguei"];
+const NAVEGAVEIS: Tela[] = ["inicio", "escrever", "qr", "acessibilidade", "ja-paguei", "conversa"];
 
 function telaDoEndereco(): Tela {
   const tela = window.location.hash.slice(1) as Tela;
@@ -152,8 +154,9 @@ export function AppProtegido({ sessao }: { sessao: Sessao }) {
 
   return (
     <>
-      {tela === "inicio" && <Inicio sessao={sessao} treino={treino} aoColar={() => ir("escrever")} aoLerQr={() => ir("qr")} aoAbrirTreino={() => ir("treino")} aoAbrirAcessibilidade={abrirAcessibilidade} aoOuvir={ouvir} />}
+      {tela === "inicio" && <Inicio sessao={sessao} treino={treino} aoColar={() => ir("escrever")} aoLerQr={() => ir("qr")} aoAbrirConversa={PERFIL ? () => ir("conversa") : undefined} aoAbrirTreino={() => ir("treino")} aoAbrirAcessibilidade={abrirAcessibilidade} aoOuvir={ouvir} />}
       {tela === "qr" && <LerQr aoLer={(codigo) => analisar(codigo, codigo.includes("000201") ? "pix" : "link")} aoVoltar={() => window.history.back()} aoColarNoLugar={() => ir("escrever")} />}
+      {tela === "conversa" && <ConversaDemo aoCompartilhar={analisar} aoVoltar={() => window.history.back()} />}
       {tela === "ja-paguei" && <JaPaguei guardiao={guardiaoPrincipal} aoVoltar={() => window.history.back()} />}
       {tela === "treino" && treino && <Treino sessao={sessao} treino={treino} aoTerminar={() => { setTreino(null); ir("inicio"); }} />}
       {tela === "escrever" && <Escrever textoInicial={texto} aoAnalisar={analisar} aoVoltar={() => window.history.back()} />}

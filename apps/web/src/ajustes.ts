@@ -1,7 +1,8 @@
 import { ajustesPadrao, type AjustesAcessibilidade } from "@guardiao/brand";
 import { useCallback, useEffect, useState } from "react";
+import { chaveDoPerfil } from "./perfil";
 
-const CHAVE = "guardiao:acessibilidade";
+const CHAVE = chaveDoPerfil("guardiao:acessibilidade");
 
 function ler(): AjustesAcessibilidade {
   try {

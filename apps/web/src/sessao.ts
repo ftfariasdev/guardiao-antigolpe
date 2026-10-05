@@ -2,8 +2,9 @@ import type { DadosSessao, EventosFamilia, SessaoCriada } from "@guardiao/shared
 import { useCallback, useEffect, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 import { api, BASE_API, ErroApi } from "./api";
+import { chaveDoPerfil, PERFIL } from "./perfil";
 
-const CHAVE = "guardiao:sessao";
+const CHAVE = chaveDoPerfil("guardiao:sessao");
 
 export interface Sessao extends DadosSessao {
   token: string;
@@ -26,11 +27,25 @@ function guardarToken(token: string | null) {
   }
 }
 
+/**
+ * Só nos perfis de demonstração: `#sessao=<token>` entrega a sessão pronta à moldura do pitch.
+ * O perfil comum ignora o fragmento, para um link malicioso não trocar a sessão de ninguém.
+ */
+function adotarSessaoDaDemo() {
+  const hash = window.location.hash.slice(1);
+  if (!PERFIL || !hash.startsWith("sessao=")) return;
+  guardarToken(hash.slice(7));
+  window.history.replaceState(null, "", window.location.pathname + window.location.search);
+}
+
 type Estado = { fase: "carregando" } | { fase: "fora" } | { fase: "dentro"; sessao: Sessao } | { fase: "sem_rede" };
 
 /** Autenticação sem senha: o token da sessão fica só neste aparelho. */
 export function useSessao() {
-  const [estado, setEstado] = useState<Estado>(() => (lerToken() ? { fase: "carregando" } : { fase: "fora" }));
+  const [estado, setEstado] = useState<Estado>(() => {
+    adotarSessaoDaDemo();
+    return lerToken() ? { fase: "carregando" } : { fase: "fora" };
+  });
 
   const carregar = useCallback(async () => {
     const token = lerToken();

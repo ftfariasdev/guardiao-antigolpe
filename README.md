@@ -30,6 +30,31 @@ pnpm carga                  # 300 conexões no golpe simulado do pitch; precisa 
 
 Detalhes em [avaliacao/README.md](./avaliacao/README.md).
 
+## Pitch
+
+A apresentação (`apps/pitch`) roda no notebook do palco e nunca vai para a internet.
+
+```bash
+cp apps/pitch/.env.example apps/pitch/.env.local   # API, app e o ADMIN_TOKEN da API
+pnpm --filter @guardiao/pitch dev                  # http://localhost:5174
+```
+
+| Tecla | Ação |
+| --- | --- |
+| `→`, `Espaço` ou passador | Próximo slide ou próximo passo |
+| `←` | Anterior |
+| `R` | Revela a simulação em todos os celulares |
+| `Z` duas vezes | Zera os contadores |
+| `P` | Abre a janela do apresentador (fala, cronômetro, placar, conexão) |
+| `D` | Prepara as contas de demonstração do slide 7 |
+| `V` | Troca a demo ao vivo pelo vídeo de backup (`apps/pitch/public/video/demo.mp4`) |
+| `B` / `F` / `L` | Tela preta / tela cheia / modo leve |
+
+- A plateia entra pelo QR do slide 1 ou digitando `<endereço do app>/#pitch`.
+- Com `DEMO_MODE=true` na API, as duas mensagens do roteiro respondem pelo cache, sem depender do LLM.
+- `http://localhost:5174/?imprimir` mostra os 11 slides em sequência para "Imprimir como PDF".
+- A origem `http://localhost:5174` precisa estar em `CORS_ORIGINS` da API que o pitch usa.
+
 ## Produção
 
 - App: https://guardiao-antigolpe.vercel.app

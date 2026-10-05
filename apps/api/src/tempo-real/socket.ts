@@ -44,7 +44,10 @@ export function criarTempoReal(http: ServidorHttp, prisma: PrismaClient, origens
   const pendentes = new Map<string, NodeJS.Timeout>();
 
   nsPitch.on("connection", async (socket) => {
-    const sessaoId = typeof socket.handshake.query.sessao === "string" ? socket.handshake.query.sessao : "";
+    // A sessão vem em `auth`, que é de cada conexão. A query é da conexão física, que o cliente
+    // divide entre namespaces: num app que abre /pitch e /familia juntos ela se perderia.
+    const informada = socket.handshake.auth.sessao ?? socket.handshake.query.sessao;
+    const sessaoId = typeof informada === "string" ? informada : "";
     if (!/^[0-9a-f-]{36}$/i.test(sessaoId)) return socket.disconnect(true);
     await socket.join(`pitch:${sessaoId}`);
     // Quem chega depois já recebe o placar e, se for o caso, a revelação.

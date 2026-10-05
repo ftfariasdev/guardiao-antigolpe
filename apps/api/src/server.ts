@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { criarApp } from "./app.js";
 import { lerConfig } from "./config.js";
+import { cnpjComCacheDeDemo, llmComCacheDeDemo } from "./demo/cache.js";
 import { iniciarEscalonamento } from "./jobs/escalonamento.js";
 import { criarProvedorAnthropic } from "./motor/llm/anthropic.js";
 import { criarConsultaCnpj } from "./servicos/cnpj.js";
@@ -33,7 +34,13 @@ const pitch: EmissorPitch = {
   reset: (id) => pitchAoVivo.reset(id),
 };
 
-const app = await criarApp({ config, prisma, pitch, motor: { llm, timeoutLlmMs: config.LLM_TIMEOUT_MS, consultarCnpj: criarConsultaCnpj() }, notificador });
+// DEMO_MODE: o roteiro do palco responde pelo cache, sem depender da internet do evento.
+const consultarCnpj = criarConsultaCnpj();
+const motor = config.DEMO_MODE
+  ? { llm: llmComCacheDeDemo(llm), timeoutLlmMs: config.LLM_TIMEOUT_MS, consultarCnpj: cnpjComCacheDeDemo(consultarCnpj) }
+  : { llm, timeoutLlmMs: config.LLM_TIMEOUT_MS, consultarCnpj };
+
+const app = await criarApp({ config, prisma, pitch, motor, notificador });
 
 const vapid =
   config.VAPID_PUBLIC_KEY && config.VAPID_PRIVATE_KEY

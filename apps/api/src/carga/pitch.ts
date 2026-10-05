@@ -63,7 +63,7 @@ async function visitante(i: number) {
   await esperar(Math.random() * JANELA_S * 1000);
   const id = randomBytes(12).toString("base64url");
   const inicio = performance.now();
-  const socket = io(`${BASE}/pitch`, { query: { sessao: sessao.id }, transports: ["websocket"], reconnection: false, timeout: 10_000 });
+  const socket = io(`${BASE}/pitch`, { auth: { sessao: sessao.id }, transports: ["websocket"], reconnection: false, timeout: 10_000 });
   sockets.push(socket);
   socket.on("pitch:contador", (p) => (ultimoPlacar = p));
   socket.on("pitch:revelar", () => {

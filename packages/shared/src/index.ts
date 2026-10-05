@@ -282,3 +282,4 @@ export interface EventosPitch {
   "pitch:revelar": () => void;
   "pitch:reset": () => void;
 }
+export * from "./demo.js";

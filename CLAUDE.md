@@ -66,11 +66,14 @@ pnpm carga                      # teste de carga do pitch: 300 conexões (precis
 
 ## Plano
 
+O app está congelado desde o D6: daqui em diante só correções, pitch e ensaio.
+
 - [x] D1: monorepo, tokens, schemas compartilhados, parser do Pix, `/api/v1/saude`, schema do Prisma
 - [x] D1: primeira migração, deploy vazio (Vercel + Railway) com `/saude` respondendo
 - [ ] D2: motor (normalização, regras, LLM, fusão) + script de avaliação no CI
 - [x] D3: telas do protegido (início, análise, resultados) com acessibilidade
 - [x] D4: família, convite por QR, alertas em tempo real, push e escalonamento
 - [x] D5: Pix + CNPJ, treino, "Já paguei"; medição ampliada; teste de carga com 300 conexões
-- [ ] D6: congelar funcionalidades; esqueleto do pitch; vídeo de backup
+- [x] D6: congelar funcionalidades; esqueleto do pitch
+- [ ] D6: gravar o vídeo de backup da demo em `apps/pitch/public/video/demo.mp4` (só dá para fazer à mão)
 - [ ] D7: cenas 3D, modo leve, PDF; ensaios

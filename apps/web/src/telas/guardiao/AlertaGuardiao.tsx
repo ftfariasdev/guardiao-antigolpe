@@ -70,17 +70,6 @@ export function AlertaGuardiao({ sessao, alertaId, aoVoltar, aoResponder }: Prop
             {alerta.status !== "respondido" && <p className="apoio">A tela de {alerta.protegido.nome} pede para não pagar até você responder.</p>}
           </section>
 
-          {alerta.analise.sinais.length > 0 && (
-            <section className="cartao" aria-labelledby="alerta-sinais">
-              <h2 id="alerta-sinais" className="subtitulo">Sinais encontrados</h2>
-              <ul className="sinais">
-                {alerta.analise.sinais.filter((s) => s.trecho !== "[CÓDIGO PIX]").map((s) => (
-                  <li key={s.codigo}><p className="sinais__trecho">“{s.trecho}”</p><p className="apoio">{s.explicacao}</p></li>
-                ))}
-              </ul>
-            </section>
-          )}
-
           {alerta.status === "respondido" ? (
             <section className="cartao cartao--destaque" role="status">
               <h2 className="subtitulo">Você respondeu</h2>
@@ -92,6 +81,17 @@ export function AlertaGuardiao({ sessao, alertaId, aoVoltar, aoResponder }: Prop
               <button type="button" className="botao botao--perigo" disabled={enviando} onClick={() => responder("era_golpe")}>Liguei, era golpe</button>
               <button type="button" className="botao botao--secundario" disabled={enviando} onClick={() => responder("pode_seguir")}>Verifiquei, pode seguir</button>
             </div>
+          )}
+
+          {alerta.analise.sinais.length > 0 && (
+            <section className="cartao" aria-labelledby="alerta-sinais">
+              <h2 id="alerta-sinais" className="subtitulo">Sinais encontrados</h2>
+              <ul className="sinais">
+                {alerta.analise.sinais.filter((s) => s.trecho !== "[CÓDIGO PIX]").map((s) => (
+                  <li key={s.codigo}><p className="sinais__trecho">“{s.trecho}”</p><p className="apoio">{s.explicacao}</p></li>
+                ))}
+              </ul>
+            </section>
           )}
 
           {alerta.status !== "respondido" && alerta.proximo_guardiao && (

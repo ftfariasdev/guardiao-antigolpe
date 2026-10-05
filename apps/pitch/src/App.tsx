@@ -47,7 +47,8 @@ function tocarAlerta() {
 
 function Palco() {
   const escala = useEscala();
-  const [indice, setIndice] = useState(0);
+  // `?slide=7` abre direto num slide: útil para ensaiar um trecho.
+  const [indice, setIndice] = useState(() => Math.min(roteiro.length, Math.max(1, Number(parametros.get("slide")) || 1)) - 1);
   const [passo, setPasso] = useState(0);
   const [inicio, setInicio] = useState<number | null>(null);
   const [leve, setLeve] = useState(false);
@@ -151,7 +152,7 @@ function Palco() {
   }, [indice, passo, pitch, inicio, leve, preto, demo.erro]);
 
   const Conteudo = SLIDES[slide.id]!;
-  const props: PropsSlide = { passo, pitch, demo: { contas: demo.contas, alertaChegando, video, erro: demo.erro } };
+  const props: PropsSlide = { passo, pitch, leve, demo: { contas: demo.contas, alertaChegando, video, erro: demo.erro } };
 
   return (
     <div className="projetor" data-leve={leve || undefined}>

@@ -10,3 +10,7 @@ coverage/
 !.env.example
 
 .DS_Store
+
+# Saídas locais: PDF dos slides e capturas de teste
+apps/pitch/pdf/
+.playwright-mcp/

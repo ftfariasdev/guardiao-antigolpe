@@ -52,7 +52,13 @@ pnpm --filter @guardiao/pitch dev                  # http://localhost:5174
 
 - A plateia entra pelo QR do slide 1 ou digitando `<endereço do app>/#pitch`.
 - Com `DEMO_MODE=true` na API, as duas mensagens do roteiro respondem pelo cache, sem depender do LLM.
-- `http://localhost:5174/?imprimir` mostra os 11 slides em sequência para "Imprimir como PDF".
+- Os slides 3, 6 e 11 têm cenas 3D do escudo. `L` troca pelo escudo 2D (modo leve); sem WebGL isso acontece sozinho.
+- `?slide=7` abre direto num slide; `?slide=3&quadro=0.5` congela a cena 3D num ponto da animação.
+- `http://localhost:5174/?imprimir` mostra os 11 slides em sequência para "Imprimir como PDF". Pelo terminal, com o pitch rodando:
+
+  ```bash
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --no-pdf-header-footer --print-to-pdf=apps/pitch/pdf/guardiao-pitch.pdf "http://localhost:5174/?imprimir"
+  ```
 - A origem `http://localhost:5174` precisa estar em `CORS_ORIGINS` da API que o pitch usa.
 
 ## Produção

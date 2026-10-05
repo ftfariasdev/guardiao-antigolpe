@@ -76,4 +76,5 @@ O app está congelado desde o D6: daqui em diante só correções, pitch e ensai
 - [x] D5: Pix + CNPJ, treino, "Já paguei"; medição ampliada; teste de carga com 300 conexões
 - [x] D6: congelar funcionalidades; esqueleto do pitch
 - [ ] D6: gravar o vídeo de backup da demo em `apps/pitch/public/video/demo.mp4` (só dá para fazer à mão)
-- [ ] D7: cenas 3D, modo leve, PDF; ensaios
+- [x] D7: cenas 3D, modo leve, PDF
+- [ ] D7: ensaios cronometrados e checklist da véspera (doc da apresentação)

@@ -1,15 +1,61 @@
-import type { ReactNode } from "react";
+import { Component, lazy, Suspense, type ReactNode } from "react";
 import { Escudo, Marca, MolduraCelular, NumeroGrande, Qr } from "../componentes/base";
 import { APP_URL, REPO_URL } from "../config";
 import { medicao } from "../medicao";
 import type { ContasDemo } from "../tempo-real/demo";
 import type { EstadoPitch } from "../tempo-real/sessao";
 
+// As cenas 3D carregam à parte: o three.js só entra nos slides 3, 6 e 11, e o canvas é
+// descarregado nos outros para liberar a placa de vídeo.
+const CenaEscudo = lazy(() => import("../cenas/CenaEscudo"));
+const semMovimento = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+/**
+ * Cena 3D do escudo, com a versão 2D do mesmo escudo no modo leve (tecla L), na impressão
+ * e enquanto o 3D carrega. Com movimento reduzido no sistema, o 3D mostra só o quadro final.
+ */
+/** Se o 3D falhar (projetor sem WebGL, placa de vídeo travada), mostra o 2D em vez de derrubar o pitch. */
+class SeO3dFalhar extends Component<{ reserva: ReactNode; children: ReactNode }, { falhou: boolean }> {
+  state = { falhou: false };
+  static getDerivedStateFromError() {
+    return { falhou: true };
+  }
+  componentDidCatch() {
+    console.warn("Cena 3D indisponível: usando a versão 2D do escudo.");
+  }
+  render() {
+    return this.state.falhou ? this.props.reserva : this.props.children;
+  }
+}
+
+function temWebGL(): boolean {
+  try {
+    const tela = document.createElement("canvas");
+    return Boolean(tela.getContext("webgl2") ?? tela.getContext("webgl"));
+  } catch {
+    return false;
+  }
+}
+
+function Cena({ modo, leve, estatico, largura2d }: { modo: "formando" | "vivo" | "fechando"; leve?: boolean; estatico?: boolean; largura2d: number }) {
+  const em2d = <div className={`cena cena--2d cena--${modo}`}><Escudo largura={largura2d} pulsando={modo === "vivo" && !estatico} /></div>;
+  if (leve || estatico || !temWebGL()) return em2d;
+  return (
+    <SeO3dFalhar reserva={em2d}>
+      <Suspense fallback={em2d}>
+        <div className={`cena cena--3d cena--${modo}`}><CenaEscudo modo={modo} parado={semMovimento()} /></div>
+      </Suspense>
+    </SeO3dFalhar>
+  );
+}
+
 export interface PropsSlide {
   /** Passo da animação dentro do slide (0 = só a entrada). */
   passo: number;
   pitch: EstadoPitch;
   demo: { contas: ContasDemo | null; alertaChegando: boolean; video: boolean; erro: string };
+  /** Modo leve (tecla L): as cenas 3D dão lugar às versões 2D do mesmo escudo. */
+  leve?: boolean;
   /** Modo impressão (?imprimir): tudo aparece pronto, sem iframes nem vídeo. */
   estatico?: boolean;
 }
@@ -54,11 +100,11 @@ function Painel({ pitch }: PropsSlide) {
   );
 }
 
-/** 3. Revelação (cena 3D 1 no D7). */
-function Revelacao({ pitch }: PropsSlide) {
+/** 3. Revelação, com a cena 3D 1: o escudo se forma. */
+function Revelacao({ pitch, leve, estatico }: PropsSlide) {
   return (
-    <div className="slide slide--centro">
-      <Escudo largura={220} />
+    <div className="slide slide--centro slide--cena">
+      <Cena modo="formando" leve={leve} estatico={estatico} largura2d={220} />
       <h1>Isso foi apenas uma <span className="acento">simulação</span>.</h1>
       <p className="frase"><NumeroGrande valor={pitch.confirmaram} className="numero--linha acento" /> de vocês tocaram em Confirmar em menos de um minuto.</p>
     </div>
@@ -84,11 +130,11 @@ function Med({ estatico }: PropsSlide) {
   );
 }
 
-/** 6. Solução (cena 3D 2 no D7). */
-function Solucao() {
+/** 6. Solução, com a cena 3D 2: o escudo vivo. */
+function Solucao({ leve, estatico }: PropsSlide) {
   return (
-    <div className="slide slide--centro">
-      <Escudo largura={240} pulsando />
+    <div className="slide slide--centro slide--cena">
+      <Cena modo="vivo" leve={leve} estatico={estatico} largura2d={240} />
       <h1>Antes de pagar, pergunte ao Guardião.</h1>
     </div>
   );
@@ -188,12 +234,12 @@ function Resultados() {
   );
 }
 
-/** 11. Fechamento (cena 3D 3 no D7). */
-function Fechamento() {
+/** 11. Fechamento, com a cena 3D 3: o escudo avança, brilha uma vez e a frase surge na frente. */
+function Fechamento({ leve, estatico }: PropsSlide) {
   return (
-    <div className="slide slide--painel">
+    <div className="slide slide--painel slide--fechamento">
+      <Cena modo="fechando" leve={leve} estatico={estatico} largura2d={140} />
       <div className="coluna">
-        <Escudo largura={140} />
         <h1>Golpe não se recupera.<br /><span className="acento">Se previne.</span></h1>
         <p className="frase">Antes de pagar, pergunte ao Guardião.</p>
       </div>

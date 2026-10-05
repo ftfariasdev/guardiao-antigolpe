@@ -16,7 +16,7 @@ describe("slides do pitch", () => {
     expect(segundos.at(-1)).toBeLessThan(300);
   });
 
-  for (const [modo, props] of [["no palco", base], ["em todos os passos", { ...base, passo: 9 }], ["na impressão", { ...base, passo: 99, estatico: true }]] as const) {
+  for (const [modo, props] of [["no palco", base], ["no modo leve", { ...base, leve: true }], ["em todos os passos", { ...base, passo: 9 }], ["na impressão", { ...base, passo: 99, estatico: true }]] as const) {
     it(`todos os slides renderizam ${modo} sem erro nem aviso no console`, () => {
       const erro = vi.spyOn(console, "error").mockImplementation(() => {});
       for (const slide of roteiro) {

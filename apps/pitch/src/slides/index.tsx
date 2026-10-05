@@ -215,21 +215,28 @@ function Diferenciais({ passo, estatico }: PropsSlide) {
 }
 
 function Resultados() {
+  if (!medicao) {
+    return (
+      <div className="slide slide--centro">
+        <p className="gigante">— de —</p>
+        <p className="frase">golpes detectados no conjunto de avaliação</p>
+        <p className="apoio">Números a preencher em src/medicao.ts depois de rodar pnpm avaliar</p>
+      </div>
+    );
+  }
+  const soRegras = medicao.modo === "regras";
+  const alarmes = medicao.alarmesFalsos === 0 ? "nenhuma legítima barrada por engano" : `${medicao.alarmesFalsos} legítima(s) barrada(s) por engano`;
+  const restantes = medicao.golpes - medicao.golpesEmVermelho;
   return (
     <div className="slide slide--centro">
-      {medicao ? (
-        <>
-          <p className="gigante"><NumeroGrande valor={medicao.golpesDetectados} className="acento" /> de {medicao.golpes}</p>
-          <p className="frase">golpes detectados no conjunto de avaliação</p>
-          <p className="apoio">{medicao.golpes} mensagens de golpe e {medicao.legitimas} legítimas · {medicao.alarmesFalsos} alarme(s) falso(s) em vermelho</p>
-        </>
-      ) : (
-        <>
-          <p className="gigante">— de —</p>
-          <p className="frase">golpes detectados no conjunto de avaliação</p>
-          <p className="apoio">Números a preencher em src/medicao.ts depois da medição com o LLM</p>
-        </>
-      )}
+      <p className="gigante">
+        <NumeroGrande valor={soRegras ? medicao.golpesEmVermelho : medicao.golpesDetectados} className="acento" /> de {medicao.golpes}
+      </p>
+      <p className="frase">{soRegras ? "golpes barrados só pelas regras, antes da IA" : "golpes detectados no conjunto de avaliação"}</p>
+      <p className="apoio">
+        {medicao.golpes} mensagens de golpe e {medicao.legitimas} legítimas · {alarmes}
+        {soRegras && restantes > 0 ? ` · os outros ${restantes} saem com aviso de cuidado` : ""}
+      </p>
     </div>
   );
 }

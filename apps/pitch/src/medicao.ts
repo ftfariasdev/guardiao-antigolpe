@@ -1,6 +1,26 @@
 /**
- * Números do slide 10, copiados do resumo de `pnpm avaliar` (motor completo, com o LLM).
- * Enquanto a medição com o LLM não rodar, ficam nulos e o slide mostra um traço:
- * número de medição só-regras não vale aqui, porque sem o LLM tudo sai no mínimo amarelo.
+ * Números do slide 10, copiados do resumo de `pnpm avaliar`.
+ *
+ * Hoje valem os da medição só com as regras (`pnpm avaliar --so-regras`). Nesse modo toda análise
+ * sai no mínimo amarela, então "detectados" não diz nada: o número que vale é o de golpes em vermelho.
+ * Quando a medição com o LLM rodar, troque o modo para "completo" e copie o resumo de novo.
  */
-export const medicao: { golpesDetectados: number; golpes: number; legitimas: number; alarmesFalsos: number } | null = null;
+export interface MedicaoDoMotor {
+  modo: "regras" | "completo";
+  golpes: number;
+  legitimas: number;
+  /** Golpes em amarelo ou vermelho. Só aparece no modo "completo". */
+  golpesDetectados: number;
+  golpesEmVermelho: number;
+  /** Mensagens legítimas em vermelho. */
+  alarmesFalsos: number;
+}
+
+export const medicao: MedicaoDoMotor | null = {
+  modo: "regras",
+  golpes: 36,
+  legitimas: 24,
+  golpesDetectados: 36,
+  golpesEmVermelho: 28,
+  alarmesFalsos: 0,
+};

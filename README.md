@@ -25,6 +25,7 @@ pnpm dev
 pnpm test                   # inclui um teste por regra do motor
 pnpm avaliar --so-regras    # mede os 30 casos só com as regras
 pnpm avaliar                # motor completo; precisa de ANTHROPIC_API_KEY no .env
+pnpm carga                  # 300 conexões no golpe simulado do pitch; precisa de ADMIN_TOKEN
 ```
 
 Detalhes em [avaliacao/README.md](./avaliacao/README.md).

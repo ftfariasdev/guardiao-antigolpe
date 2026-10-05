@@ -59,6 +59,10 @@ describe("regras do Pix", () => {
     expect(codigos("Segue o Pix", pix("11222333000181", "ESCOLA", "CURITIBA"), empresa(4000, "ATIVA", "Curitiba"))).not.toContain("pix_cidade_divergente");
   });
 
+  it("cidade cortada em 15 letras no código não conta como divergente", () => {
+    expect(codigos("Segue o Pix", pix("11222333000181", "ESCOLA", "SAO JOSE DOS CA"), empresa(4000, "ATIVA", "São José dos Campos"))).not.toContain("pix_cidade_divergente");
+  });
+
   it("a instrução final manda conferir a razão social e nunca manda pagar", () => {
     const frase = instrucaoConferirNome("mensalidade da escola", pix("11222333000181", "ESCOLA"), empresa(4000));
     expect(frase).toContain("ESCOLA PEQUENO SABER LTDA");

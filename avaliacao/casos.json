@@ -1,5 +1,5 @@
 {
-  "versao": 1,
+  "versao": 2,
   "observacao": "Textos sintéticos, com nomes e números inventados. Para entrada 'pix', o código é gerado com gerarBRCode a partir de 'pix'. Para 'audio', 'mensagem' é a transcrição. Para 'imagem', 'mensagem' é o texto do print; a imagem é criada no D2.",
   "casos": [
     {
@@ -352,6 +352,348 @@
         "tipo_golpe": "nenhum"
       },
       "armadilha": "Correios sem link nem taxa"
+    },
+    {
+      "id": "C31",
+      "golpe": true,
+      "entrada": "texto",
+      "mensagem": "Mãe, perdi meu celular e tô usando o de uma amiga. Preciso de 1.200 reais agora pra não perder o aluguel, manda no Pix dela que eu te explico depois.",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "falso_parente"
+      }
+    },
+    {
+      "id": "C32",
+      "golpe": true,
+      "entrada": "audio",
+      "mensagem": "Vô, sou eu, seu neto. Bati o carro e o moço quer receber hoje, senão chama a polícia. Faz uma transferência de 3 mil pra conta dele, por favor não fala nada pra mãe.",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "falso_parente"
+      }
+    },
+    {
+      "id": "C33",
+      "golpe": true,
+      "entrada": "texto",
+      "mensagem": "Oi tia, esse é meu novo número. Meu aplicativo do banco travou, consegue pagar um boleto de R$ 640 pra mim ainda hoje? Amanhã cedo eu te devolvo.",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "falso_parente"
+      }
+    },
+    {
+      "id": "C34",
+      "golpe": true,
+      "entrada": "texto",
+      "mensagem": "Banco: seu cartão foi clonado. Para bloquear, informe a senha de 6 dígitos e o código de segurança do verso ao nosso atendente virtual.",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "falsa_central"
+      }
+    },
+    {
+      "id": "C35",
+      "golpe": true,
+      "entrada": "audio",
+      "mensagem": "Bom dia, falo da central de prevenção a fraudes. Houve uma tentativa de empréstimo no seu nome. Para cancelar, baixe o aplicativo de suporte que vou te indicar e me passe o código que aparecer.",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "falsa_central"
+      }
+    },
+    {
+      "id": "C36",
+      "golpe": true,
+      "entrada": "texto",
+      "mensagem": "Identificamos uma transação suspeita de R$ 4.990,00. Para estornar, faça um Pix de teste para a conta reserva informada pelo gerente.",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "falsa_central"
+      }
+    },
+    {
+      "id": "C37",
+      "golpe": true,
+      "entrada": "texto",
+      "mensagem": "Por segurança, seu cartão será recolhido hoje por um motoboy credenciado. Coloque o cartão cortado e a senha em um envelope lacrado.",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "falso_motoboy"
+      }
+    },
+    {
+      "id": "C38",
+      "golpe": true,
+      "entrada": "texto",
+      "mensagem": "Receita Federal: seu CPF será suspenso por pendência no imposto de renda. Regularize agora em receita-regulariza.online/cpf",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "link_falso"
+      }
+    },
+    {
+      "id": "C39",
+      "golpe": true,
+      "entrada": "texto",
+      "mensagem": "Sua conta foi selecionada para receber o valor esquecido de R$ 1.873,00. Resgate ainda hoje: tinyurl.com/valores-a-receber",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "link_falso"
+      }
+    },
+    {
+      "id": "C40",
+      "golpe": true,
+      "entrada": "texto",
+      "mensagem": "NETFLIX: não conseguimos processar seu pagamento. Atualize seus dados do cartão em netflix-conta-br.site para não perder o acesso.",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "link_falso"
+      }
+    },
+    {
+      "id": "C41",
+      "golpe": true,
+      "entrada": "imagem",
+      "mensagem": "Trabalhe pelo celular! Curta publicações e ganhe R$ 200 por dia. Faça o depósito de R$ 30 para liberar suas tarefas e sacar no mesmo dia.",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "falso_emprego"
+      },
+      "imagem": "avaliacao/imagens/C41.png"
+    },
+    {
+      "id": "C42",
+      "golpe": true,
+      "entrada": "texto",
+      "mensagem": "Você foi aprovada na vaga de digitadora, salário de R$ 3.500. Para emitir o contrato, pague a taxa de cadastro de R$ 89,90 hoje.",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "falso_emprego"
+      }
+    },
+    {
+      "id": "C43",
+      "golpe": true,
+      "entrada": "texto",
+      "mensagem": "Robô de investimentos com retorno de 5% ao dia, garantido em contrato. Entrada mínima de R$ 200 via Pix, só para os 20 primeiros.",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "falso_investimento"
+      }
+    },
+    {
+      "id": "C44",
+      "golpe": true,
+      "entrada": "audio",
+      "mensagem": "Oi, aqui é o consultor. O lucro de vocês no grupo já está em 40%. Para sacar é só depositar a taxa de liberação de 150 reais ainda hoje.",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "falso_investimento"
+      }
+    },
+    {
+      "id": "C45",
+      "golpe": true,
+      "entrada": "imagem",
+      "mensagem": "iPhone 15 lacrado por R$ 1.499, últimas unidades. Pagamento somente por Pix, entrega em 15 dias, não aceitamos cartão.",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "compra_falsa"
+      },
+      "imagem": "avaliacao/imagens/C45.png"
+    },
+    {
+      "id": "C46",
+      "golpe": true,
+      "entrada": "pix",
+      "mensagem": "Segue o Pix do seu IPTU atrasado com 50% de desconto, pague hoje para não ir a protesto:",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "falso_boleto"
+      },
+      "pix": {
+        "chave": "11987654321",
+        "nome": "JOSE R OLIVEIRA",
+        "cidade": "RECIFE",
+        "valor": 412.3
+      }
+    },
+    {
+      "id": "C47",
+      "golpe": true,
+      "entrada": "pix",
+      "mensagem": "Boleto da sua internet atualizado, pague hoje para evitar o corte:",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "falso_boleto"
+      },
+      "pix": {
+        "chave": "33444555000166",
+        "nome": "NET PAGAMENTOS DIGITAIS",
+        "cidade": "SAO PAULO",
+        "valor": 129.9,
+        "cnpj_simulado": {
+          "razao_social": "NET PAGAMENTOS DIGITAIS LTDA",
+          "dias_desde_abertura": 35,
+          "situacao": "ATIVA"
+        }
+      }
+    },
+    {
+      "id": "C48",
+      "golpe": true,
+      "entrada": "texto",
+      "mensagem": "Oi, sou do suporte do WhatsApp. Sua conta será desativada. Para manter, me envie o código de 6 dígitos que acabou de chegar por SMS.",
+      "esperado": {
+        "risco": "vermelho",
+        "tipo_golpe": "outro"
+      }
+    },
+    {
+      "id": "C49",
+      "golpe": false,
+      "entrada": "texto",
+      "mensagem": "Banco: sua fatura fecha no dia 12. Consulte o valor no aplicativo. Nunca pedimos sua senha por mensagem.",
+      "esperado": {
+        "risco": "verde",
+        "tipo_golpe": "nenhum"
+      },
+      "armadilha": "Banco avisando, sem pedir nada"
+    },
+    {
+      "id": "C50",
+      "golpe": false,
+      "entrada": "texto",
+      "mensagem": "Filha, o encanador cobrou 180 reais. Quando você vier no sábado a gente acerta, tá bom?",
+      "esperado": {
+        "risco": "verde",
+        "tipo_golpe": "nenhum"
+      },
+      "armadilha": "Fala de dinheiro, mas não pede transferência"
+    },
+    {
+      "id": "C51",
+      "golpe": false,
+      "entrada": "texto",
+      "mensagem": "Oi mãe! Passei na prova! Liga pra mim quando puder, quero te contar tudo.",
+      "esperado": {
+        "risco": "verde",
+        "tipo_golpe": "nenhum"
+      },
+      "armadilha": "Parente pedindo ligação"
+    },
+    {
+      "id": "C52",
+      "golpe": false,
+      "entrada": "audio",
+      "mensagem": "Seu Antônio, aqui é da clínica. Confirmando seu exame na quinta, às 14h. Traga um documento com foto.",
+      "esperado": {
+        "risco": "verde",
+        "tipo_golpe": "nenhum"
+      },
+      "armadilha": "Clínica confirmando horário"
+    },
+    {
+      "id": "C53",
+      "golpe": false,
+      "entrada": "texto",
+      "mensagem": "Farmácia Popular: seu medicamento de uso contínuo já está disponível para retirada na loja.",
+      "esperado": {
+        "risco": "verde",
+        "tipo_golpe": "nenhum"
+      },
+      "armadilha": "Aviso de retirada"
+    },
+    {
+      "id": "C54",
+      "golpe": false,
+      "entrada": "texto",
+      "mensagem": "Correios: objeto entregue ao destinatário. Obrigado por usar nossos serviços.",
+      "esperado": {
+        "risco": "verde",
+        "tipo_golpe": "nenhum"
+      },
+      "armadilha": "Correios sem link nem taxa"
+    },
+    {
+      "id": "C55",
+      "golpe": false,
+      "entrada": "texto",
+      "mensagem": "Lembrete do condomínio: assembleia geral na terça, às 19h30, no salão de festas.",
+      "esperado": {
+        "risco": "verde",
+        "tipo_golpe": "nenhum"
+      },
+      "armadilha": "Condomínio sem cobrança"
+    },
+    {
+      "id": "C56",
+      "golpe": false,
+      "entrada": "texto",
+      "mensagem": "Vó, a senha do Wi-Fi lá de casa é o nome do cachorro com 123 no final. Depois eu te ajudo a colocar.",
+      "esperado": {
+        "risco": "verde",
+        "tipo_golpe": "nenhum"
+      },
+      "armadilha": "Fala de senha, mas é o neto informando"
+    },
+    {
+      "id": "C57",
+      "golpe": false,
+      "entrada": "pix",
+      "mensagem": "Segue o Pix do plano de saúde deste mês, vencimento dia 20.",
+      "esperado": {
+        "risco": "verde",
+        "tipo_golpe": "nenhum"
+      },
+      "armadilha": "Pix legítimo de empresa antiga",
+      "pix": {
+        "chave": "22333444000155",
+        "nome": "SAUDE VIDA OPERADORA",
+        "cidade": "BELO HORIZONTE",
+        "valor": 486.0,
+        "cnpj_simulado": {
+          "razao_social": "SAUDE VIDA OPERADORA DE PLANOS LTDA",
+          "dias_desde_abertura": 5100,
+          "situacao": "ATIVA"
+        }
+      }
+    },
+    {
+      "id": "C58",
+      "golpe": false,
+      "entrada": "texto",
+      "mensagem": "Sua compra no mercado foi registrada: R$ 213,47 no débito. Saldo disponível no aplicativo.",
+      "esperado": {
+        "risco": "verde",
+        "tipo_golpe": "nenhum"
+      },
+      "armadilha": "Aviso de compra sem pedido"
+    },
+    {
+      "id": "C59",
+      "golpe": false,
+      "entrada": "texto",
+      "mensagem": "Oi, é a Lúcia do grupo da igreja. Domingo tem almoço comunitário, cada um leva um prato. Você vem?",
+      "esperado": {
+        "risco": "verde",
+        "tipo_golpe": "nenhum"
+      },
+      "armadilha": "Convite de conhecida"
+    },
+    {
+      "id": "C60",
+      "golpe": false,
+      "entrada": "texto",
+      "mensagem": "Prefeitura: campanha de vacinação contra a gripe para maiores de 60 anos começa segunda, no posto do seu bairro.",
+      "esperado": {
+        "risco": "verde",
+        "tipo_golpe": "nenhum"
+      },
+      "armadilha": "Órgão público informando"
     }
   ]
 }

@@ -10,10 +10,13 @@ export interface Notificador {
   /** Avisa a família que o guardião respondeu; destrava a tela do protegido. */
   alertaRespondido(familiaId: string, dados: { alerta_id: string; resposta: RespostaAlerta; guardiao: string }): void;
   alertaEscalado(familiaId: string, dados: { alerta_id: string; proximo_guardiao: string }): void;
+  /** Entrega um golpe simulado ao protegido, dentro do app. */
+  treinoNovo(protegidoId: string, dados: { treino_id: string; conteudo: string }): void;
 }
 
 export const notificadorMudo: Notificador = {
   alertaNovo: async () => {},
   alertaRespondido: () => {},
   alertaEscalado: () => {},
+  treinoNovo: () => {},
 };

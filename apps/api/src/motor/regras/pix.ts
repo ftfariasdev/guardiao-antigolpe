@@ -100,7 +100,9 @@ export function aplicarRegrasPix({ dados, mensagem, cnpj, agora, chavesDenunciad
   if (dados.chave && chavesDenunciadas.has(dados.chave.toLowerCase())) {
     sinal("pix_chave_denunciada", "forte", "Esta chave Pix já foi denunciada por outras pessoas.");
   }
-  if (cnpj?.municipio && dados.cidade && simplificar(cnpj.municipio) !== simplificar(dados.cidade)) {
+  // A cidade no BR Code tem no máximo 15 letras, então a comparação é pelo começo do nome.
+  const cidadePix = simplificar(dados.cidade ?? "");
+  if (cnpj?.municipio && cidadePix && !simplificar(cnpj.municipio).startsWith(cidadePix)) {
     sinal("pix_cidade_divergente", "fraco", "A cidade do recebedor no código é diferente da cidade da empresa.");
   }
   return sinais;

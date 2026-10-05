@@ -39,7 +39,7 @@ function porPadroes(...padroes: RegExp[]): RegraTexto["procurar"] {
 }
 
 const VERBO_ENVIAR = "(?:faz|faca|fazer|manda|mande|mandar|envia|envie|enviar|transfere|transfira|transferir|deposita|deposite|depositar)";
-const VERBO_PASSAR = "(?:passa|passe|passar|informa|informe|informar|envia|envie|enviar|manda|mande|mandar|confirma|confirme|confirmar|digita|digite|digitar|atualiza|atualize|atualizar|fala|fale|diz|diga)";
+const VERBO_PASSAR = "(?:passa|passe|passar|informa|informe|informar|envia|envie|enviar|manda|mande|mandar|confirma|confirme|confirmar|digita|digite|digitar|atualiza|atualize|atualizar|fala|fale|diz|diga|responda|responder|responde)";
 
 export const REGRAS_TEXTO: RegraTexto[] = [
   /* ---------- Gatilhos ---------- */
@@ -53,7 +53,7 @@ export const REGRAS_TEXTO: RegraTexto[] = [
       new RegExp(`\\b(?:preciso|precisando|precisava) de ${ate(15)}\\d[\\d.,]*(?: reais)?`),
       new RegExp(`\\bme ajudar? com ${ate(10)}\\d[\\d.,]*`),
       /\bpagamento (?:apenas |so |somente |unicamente )?(?:por|via|no|em) pix\b/,
-      new RegExp(`\\b(?:minimo|apenas|somente) de r\\$ ?\\d[\\d.,]*${ate(15)}pix`),
+      new RegExp(`\\b(?:minim[oa]|apenas|somente|entrada) de r\\$ ?\\d[\\d.,]*${ate(15)}pix`),
       new RegExp(`\\bme empresta${ate(30)}`),
     ),
   },
@@ -105,6 +105,8 @@ export const REGRAS_TEXTO: RegraTexto[] = [
       new RegExp(`\\b(?:identificamos|detectamos|constatamos|houve)${ate(30)}\\b(?:compra|transacao|movimentacao|tentativa|acesso)${ate(25)}`),
       /\b(?:compra|transacao|movimentacao) (?:nao reconhecida|suspeita|indevida)\b/,
       /\b(?:sua |a )?conta (?:foi |esta |sera )?(?:invadida|clonada|hackeada|bloqueada|comprometida)\b/,
+      /\b(?:seu |o )?cartao (?:foi |esta )?(?:clonado|invadido|comprometido)\b/,
+      /\btentativa de (?:emprestimo|compra|saque|transferencia|acesso|golpe)\b/,
     ),
   },
   {
@@ -123,6 +125,7 @@ export const REGRAS_TEXTO: RegraTexto[] = [
     procurar: porPadroes(
       new RegExp(`\\b(?:portador|motoboy|mensageiro|funcionario|entregador)${ate(40)}\\b(?:retirar|buscar|recolher|coletar|pegar)${ate(20)}`),
       new RegExp(`\\b(?:retirar|buscar|recolher|coletar)${ate(15)}\\bcartao\\b`),
+      new RegExp(`\\bcartao${ate(20)}\\b(?:recolhido|retirado|buscado|coletado)\\b${ate(30)}`),
       new RegExp(`\\b(?:corte|cortar|quebre)${ate(20)}\\b(?:cartao|ao meio|chip)\\b`),
     ),
   },
@@ -207,7 +210,7 @@ export const REGRAS_TEXTO: RegraTexto[] = [
     forca: "fraco",
     explicacao: "Ameaça de bloqueio ou de nome sujo serve para assustar e apressar você.",
     procurar: porPadroes(
-      /\bsera (?:bloquead|cancelad|suspens|protestad|negativad|encerrad)\w*/,
+      /\bsera (?:bloquead|cancelad|suspens|protestad|negativad|encerrad|desativad)\w*/,
       new RegExp(`\\b(?:evitar|evite)${ate(10)}\\b(?:bloqueio|cancelamento|suspensao|protesto)${ate(20)}`),
       /\b(?:serasa|spc|protesto em cartorio|nome sujo|negativad[oa]|limpar (?:o |seu )?nome)\b/,
     ),

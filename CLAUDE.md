@@ -39,7 +39,8 @@ pnpm --filter @guardiao/api db:generate
 pnpm --filter @guardiao/api db:migrate
 pnpm dev                        # api :3000, web :5173, pitch :5174
 pnpm test && pnpm typecheck     # os testes da API usam o banco guardiao_teste (precisa do db:up)
-pnpm avaliar                    # mede o motor nos 30 casos (--so-regras dispensa a chave)
+pnpm avaliar                    # mede o motor nos 60 casos (--so-regras dispensa a chave)
+pnpm carga                      # teste de carga do pitch: 300 conexões (precisa de ADMIN_TOKEN)
 ```
 
 ## Regras que nunca podem ser quebradas

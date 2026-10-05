@@ -1,6 +1,7 @@
 import type { AlertaNovo, SessaoCriada } from "@guardiao/shared";
 import { PrismaClient } from "@prisma/client";
 import type { FastifyInstance } from "fastify";
+import { emissorPitchMudo } from "../rotas/pitch.js";
 import { criarApp } from "../app.js";
 import { lerConfig } from "../config.js";
 import type { DependenciasMotor } from "../motor/index.js";
@@ -8,7 +9,7 @@ import type { Notificador } from "../tempo-real/notificador.js";
 import { URL_BANCO_TESTE } from "./preparar-banco.js";
 
 export const prisma = new PrismaClient({ datasources: { db: { url: URL_BANCO_TESTE } } });
-export const config = lerConfig({ NODE_ENV: "test", DATABASE_URL: URL_BANCO_TESTE });
+export const config = lerConfig({ NODE_ENV: "test", DATABASE_URL: URL_BANCO_TESTE, ADMIN_TOKEN: "segredo-do-palco" });
 
 export async function limparBanco() {
   await prisma.$executeRawUnsafe('TRUNCATE "familias", "pitch_sessoes" CASCADE');
@@ -19,17 +20,19 @@ export function notificadorEspiao() {
   const novos: { guardiaoId: string; dados: AlertaNovo }[] = [];
   const respondidos: { familiaId: string; dados: Parameters<Notificador["alertaRespondido"]>[1] }[] = [];
   const escalados: { familiaId: string; dados: Parameters<Notificador["alertaEscalado"]>[1] }[] = [];
+  const treinos: { protegidoId: string; dados: { treino_id: string; conteudo: string } }[] = [];
   const notificador: Notificador = {
     alertaNovo: async (guardiaoId, dados) => void novos.push({ guardiaoId, dados }),
     alertaRespondido: (familiaId, dados) => void respondidos.push({ familiaId, dados }),
     alertaEscalado: (familiaId, dados) => void escalados.push({ familiaId, dados }),
+    treinoNovo: (protegidoId, dados) => void treinos.push({ protegidoId, dados }),
   };
-  return { notificador, novos, respondidos, escalados };
+  return { notificador, novos, respondidos, escalados, treinos };
 }
 
 export async function montar(motor: DependenciasMotor = { llm: null, timeoutLlmMs: 50 }) {
   const espiao = notificadorEspiao();
-  const app = await criarApp({ config, prisma, motor, notificador: espiao.notificador });
+  const app = await criarApp({ config, prisma, motor, notificador: espiao.notificador, pitch: emissorPitchMudo });
   return { app, ...espiao };
 }
 

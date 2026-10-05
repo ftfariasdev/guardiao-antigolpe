@@ -1,18 +1,22 @@
 import { Cabecalho } from "../../componentes/Cabecalho";
-import { IconeColar, IconeCompartilhar } from "../../componentes/Icones";
+import type { TreinoDetalhe } from "@guardiao/shared";
+import { Escudo, IconeColar, IconeCompartilhar, IconeQr } from "../../componentes/Icones";
 
 import type { Sessao } from "../../sessao";
 
 interface Props {
   sessao: Sessao;
+  treino: TreinoDetalhe | null;
   aoColar: () => void;
+  aoLerQr: () => void;
+  aoAbrirTreino: () => void;
   aoAbrirAcessibilidade: () => void;
   aoOuvir: (texto: string) => void;
 }
 
 const CHAMADA = "Recebeu algo estranho? Mostre para o Guardião antes de pagar.";
 
-export function Inicio({ sessao, aoColar, aoAbrirAcessibilidade, aoOuvir }: Props) {
+export function Inicio({ sessao, treino, aoColar, aoLerQr, aoAbrirTreino, aoAbrirAcessibilidade, aoOuvir }: Props) {
   const SAUDACAO = `Olá, ${sessao.membro.nome}`;
   const guardioes = sessao.familia.membros.filter((m) => m.papel === "guardiao");
   return (
@@ -26,6 +30,16 @@ export function Inicio({ sessao, aoColar, aoAbrirAcessibilidade, aoOuvir }: Prop
         <IconeColar />
         Colar mensagem
       </button>
+      <button type="button" className="botao botao--secundario botao--grande" onClick={aoLerQr}>
+        <IconeQr />
+        Ler QR Code do Pix
+      </button>
+      {treino && (
+        <button type="button" className="cartao cartao--destaque cartao--botao" onClick={aoAbrirTreino}>
+          <span className="com-icone"><Escudo largura={26} /><strong>{treino.enviado_por} mandou um treino</strong></span>
+          <span className="apoio">Toque para praticar. É rápido.</span>
+        </button>
+      )}
       <div className="cartao cartao--dica">
         <span className="selo" aria-hidden="true"><IconeCompartilhar tamanho={22} /></span>
         <p>Copie a mensagem no WhatsApp, volte aqui e toque em <strong>Colar mensagem</strong>.</p>

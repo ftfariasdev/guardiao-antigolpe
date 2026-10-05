@@ -12,10 +12,12 @@ export async function resumoDaFamilia(prisma: PrismaClient, familiaId: string): 
     where: { id: familiaId },
     include: { membros: { orderBy: [{ papel: "asc" }, { ordem: "asc" }, { criadoEm: "asc" }] } },
   });
+  const { _sum } = await prisma.treino.aggregate({ where: { familiaId }, _sum: { pontos: true } });
   return {
     id: familia.id,
     nome: familia.nome,
     tem_palavra_senha: familia.palavraSenhaHash !== null,
+    escudos: _sum.pontos ?? 0,
     membros: familia.membros.map(resumoDoMembro),
   };
 }

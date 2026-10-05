@@ -61,8 +61,18 @@ const { casos } = JSON.parse(readFileSync(ARQUIVO_CASOS, "utf8")) as { casos: Ca
 const agora = new Date();
 const modelo = process.env.LLM_MODEL || "claude-opus-5-5";
 const timeoutLlmMs = Number(process.env.LLM_TIMEOUT_MS) || 8000;
+// O motor engole a falha do LLM (fail-safe). Aqui guardamos o motivo, para a medição não ficar muda.
+const falhasLlm = new Map<string, number>();
+const provedor = soRegras ? null : criarProvedorAnthropic({ apiKey, modelo, timeoutMs: timeoutLlmMs });
 const deps: DependenciasMotor = {
-  llm: soRegras ? null : criarProvedorAnthropic({ apiKey, modelo, timeoutMs: timeoutLlmMs }),
+  llm: provedor && {
+    analisar: (pedido, sinal) =>
+      provedor.analisar(pedido, sinal).catch((erro: { status?: number; message?: string }) => {
+        const motivo = erro.status ? `HTTP ${erro.status}: ${String(erro.message).replace(/^\d+ /, "").slice(0, 200)}` : String(erro.message).slice(0, 200);
+        falhasLlm.set(motivo, (falhasLlm.get(motivo) ?? 0) + 1);
+        throw erro;
+      }),
+  },
   timeoutLlmMs,
   consultarCnpj: cnpjSimulado(casos, agora),
   agora: () => agora,
@@ -101,5 +111,6 @@ for (const meta of resumo.metas) {
 console.log(`  · Atrito (legítima em amarelo): ${resumo.atrito}`);
 console.log(`  · Análises parciais: ${resumo.parciais}/${medicoes.length}`);
 console.log(`  · Latência p95: ${resumo.latencia_p95_ms} ms`);
+for (const [motivo, vezes] of falhasLlm) console.log(`  ! LLM falhou ${vezes}x: ${motivo}`);
 console.log(resumo.aprovado ? "\nMetas atingidas." : "\nMetas NÃO atingidas.");
 process.exit(resumo.aprovado ? 0 : 1);

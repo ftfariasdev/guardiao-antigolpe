@@ -12,7 +12,8 @@
     "db:migrate": "node --env-file-if-exists=../../.env node_modules/prisma/build/index.js migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate",
-    "avaliar": "tsx --env-file-if-exists=../../.env src/avaliacao/medir.ts"
+    "avaliar": "tsx --env-file-if-exists=../../.env src/avaliacao/medir.ts",
+    "carga": "tsx --env-file-if-exists=../../.env src/carga/pitch.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

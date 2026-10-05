@@ -1,5 +1,5 @@
 import { vibracao } from "@guardiao/brand";
-import type { ResultadoAnalise } from "@guardiao/shared";
+import type { ResultadoAnalise, TipoEntrada, TreinoDetalhe } from "@guardiao/shared";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAjustes } from "../../ajustes";
 import { api } from "../../api";
@@ -9,13 +9,16 @@ import { Analisando } from "./Analisando";
 import { Escrever } from "./Escrever";
 import { FALA_FALHA, Falha } from "./Falha";
 import { Inicio } from "./Inicio";
+import { JaPaguei } from "./JaPaguei";
+import { LerQr } from "./LerQr";
+import { Treino } from "./Treino";
 import { falaDaResposta, Resultado, resumoFalado } from "./Resultado";
 import { calar, falar } from "../../voz";
 
-type Tela = "inicio" | "escrever" | "analisando" | "resultado" | "falha" | "acessibilidade";
+type Tela = "inicio" | "escrever" | "qr" | "analisando" | "resultado" | "falha" | "acessibilidade" | "ja-paguei" | "treino";
 
 /** Telas que o botão Voltar do celular alcança; análise e resultado não entram no histórico. */
-const NAVEGAVEIS: Tela[] = ["inicio", "escrever", "acessibilidade"];
+const NAVEGAVEIS: Tela[] = ["inicio", "escrever", "qr", "acessibilidade", "ja-paguei"];
 
 function telaDoEndereco(): Tela {
   const tela = window.location.hash.slice(1) as Tela;
@@ -28,6 +31,8 @@ export function AppProtegido({ sessao }: { sessao: Sessao }) {
   const [texto, setTexto] = useState("");
   const [resultado, setResultado] = useState<ResultadoAnalise | null>(null);
   const [anuncio, setAnuncio] = useState("");
+  const [tipo, setTipo] = useState<TipoEntrada>("texto");
+  const [treino, setTreino] = useState<TreinoDetalhe | null>(null);
   const pedido = useRef<AbortController | null>(null);
   /** Tela para onde a Acessibilidade volta quando foi aberta a partir de um resultado. */
   const retorno = useRef<Tela | null>(null);
@@ -61,15 +66,16 @@ export function AppProtegido({ sessao }: { sessao: Sessao }) {
   }, []);
 
   const analisar = useCallback(
-    async (mensagem: string) => {
+    async (mensagem: string, entrada: TipoEntrada = "texto") => {
       setTexto(mensagem);
+      setTipo(entrada);
       window.history.replaceState(null, "", window.location.pathname);
       setTela("analisando");
       setAnuncio("Analisando a mensagem. Não pague nada enquanto isso.");
       const controle = new AbortController();
       pedido.current = controle;
       try {
-        const r = await api.analisar(sessao.token, mensagem, controle.signal);
+        const r = await api.analisar(sessao.token, mensagem, entrada, controle.signal);
         setResultado(r);
         setTela("resultado");
         setAnuncio(resumoFalado(r));
@@ -84,6 +90,15 @@ export function AppProtegido({ sessao }: { sessao: Sessao }) {
     },
     [ajustes.vozAutomatica, ajustes.vozLenta, ajustes.vibrarNoRisco, sessao.token],
   );
+
+  // Treino pendente: aparece no início e chega ao vivo quando o guardião envia.
+  const buscarTreino = useCallback(async () => {
+    const lista = await api.treinos(sessao.token).catch(() => null);
+    if (lista) setTreino(lista.itens.find((t) => t.resultado === "pendente") ?? null);
+  }, [sessao.token]);
+  useEffect(() => {
+    void buscarTreino();
+  }, [buscarTreino]);
 
   // Resposta do guardião ou escalonamento: busca o estado novo do alerta e anuncia.
   const idAnalise = useRef<string | null>(null);
@@ -105,6 +120,10 @@ export function AppProtegido({ sessao }: { sessao: Sessao }) {
       }),
     );
     socket.on("alerta:escalado", (dados) => void atualizar(() => `${dados.proximo_guardiao} foi avisado.`));
+    socket.on("treino:novo", () => {
+      setAnuncio("Você recebeu um treino antigolpe.");
+      void buscarTreino();
+    });
   });
 
   const cancelar = useCallback(() => {
@@ -124,15 +143,25 @@ export function AppProtegido({ sessao }: { sessao: Sessao }) {
     ir("acessibilidade");
   }, [ir, tela]);
 
+  const abrirJaPaguei = useCallback(() => {
+    retorno.current = tela === "resultado" ? tela : null;
+    ir("ja-paguei");
+  }, [ir, tela]);
+
+  const guardiaoPrincipal = sessao.familia.membros.find((m) => m.papel === "guardiao")?.nome ?? null;
+
   return (
     <>
-      {tela === "inicio" && <Inicio sessao={sessao} aoColar={() => ir("escrever")} aoAbrirAcessibilidade={abrirAcessibilidade} aoOuvir={ouvir} />}
+      {tela === "inicio" && <Inicio sessao={sessao} treino={treino} aoColar={() => ir("escrever")} aoLerQr={() => ir("qr")} aoAbrirTreino={() => ir("treino")} aoAbrirAcessibilidade={abrirAcessibilidade} aoOuvir={ouvir} />}
+      {tela === "qr" && <LerQr aoLer={(codigo) => analisar(codigo, codigo.includes("000201") ? "pix" : "link")} aoVoltar={() => window.history.back()} aoColarNoLugar={() => ir("escrever")} />}
+      {tela === "ja-paguei" && <JaPaguei guardiao={guardiaoPrincipal} aoVoltar={() => window.history.back()} />}
+      {tela === "treino" && treino && <Treino sessao={sessao} treino={treino} aoTerminar={() => { setTreino(null); ir("inicio"); }} />}
       {tela === "escrever" && <Escrever textoInicial={texto} aoAnalisar={analisar} aoVoltar={() => window.history.back()} />}
       {tela === "analisando" && <Analisando aoCancelar={cancelar} />}
       {tela === "resultado" && resultado && (
-        <Resultado resultado={resultado} ajustes={ajustes} aoVoltar={recomecar} aoOuvir={ouvir} aoAbrirAcessibilidade={abrirAcessibilidade} />
+        <Resultado resultado={resultado} ajustes={ajustes} aoVoltar={recomecar} aoOuvir={ouvir} aoJaPaguei={abrirJaPaguei} aoAbrirAcessibilidade={abrirAcessibilidade} />
       )}
-      {tela === "falha" && <Falha aoTentarDeNovo={() => analisar(texto)} aoVoltar={recomecar} aoAbrirAcessibilidade={abrirAcessibilidade} />}
+      {tela === "falha" && <Falha aoTentarDeNovo={() => analisar(texto, tipo)} aoVoltar={recomecar} aoAbrirAcessibilidade={abrirAcessibilidade} />}
       {tela === "acessibilidade" && <Acessibilidade ajustes={ajustes} mudar={mudar} restaurar={restaurar} aoVoltar={() => window.history.back()} />}
       {/* Região viva única: o leitor de tela anuncia o resultado assim que ele chega. */}
       <p className="so-leitor" role="status" aria-live="assertive" aria-atomic="true">{anuncio}</p>

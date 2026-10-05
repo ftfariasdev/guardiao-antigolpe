@@ -8,7 +8,9 @@ import type { DependenciasMotor } from "./motor/index.js";
 import { rotasAlertas } from "./rotas/alertas.js";
 import { rotasAnalises } from "./rotas/analises.js";
 import { rotasFamilias } from "./rotas/familias.js";
+import { rotasPitch, type EmissorPitch } from "./rotas/pitch.js";
 import { rotasSaude } from "./rotas/saude.js";
+import { rotasTreinos } from "./rotas/treinos.js";
 import type { Notificador } from "./tempo-real/notificador.js";
 
 export interface Dependencias {
@@ -16,9 +18,10 @@ export interface Dependencias {
   prisma: PrismaClient;
   motor: DependenciasMotor;
   notificador: Notificador;
+  pitch: EmissorPitch;
 }
 
-export async function criarApp({ config, prisma, motor, notificador }: Dependencias): Promise<FastifyInstance> {
+export async function criarApp({ config, prisma, motor, notificador, pitch }: Dependencias): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
       level: config.NODE_ENV === "test" ? "silent" : "info",
@@ -53,6 +56,8 @@ export async function criarApp({ config, prisma, motor, notificador }: Dependenc
   await app.register(rotasFamilias(prisma), v1);
   await app.register(rotasAnalises({ prisma, motor, notificador }), v1);
   await app.register(rotasAlertas(prisma, notificador), v1);
+  await app.register(rotasTreinos(prisma, notificador), v1);
+  await app.register(rotasPitch(prisma, pitch, config.ADMIN_TOKEN), v1);
   // Chave pública do Web Push: o app precisa dela para pedir a inscrição ao navegador.
   app.get("/api/v1/push/chave-publica", async () => ({ chave: config.VAPID_PUBLIC_KEY || null }));
   return app;

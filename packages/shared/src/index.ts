@@ -125,6 +125,8 @@ export const FamiliaResumo = z.object({
   nome: z.string(),
   /** A palavra-senha nunca é devolvida; só se sabe se existe. */
   tem_palavra_senha: z.boolean(),
+  /** Pontos de escudo somados nos treinos. */
+  escudos: z.number().int().default(0),
   membros: z.array(MembroResumo),
 });
 export type FamiliaResumo = z.infer<typeof FamiliaResumo>;
@@ -194,6 +196,59 @@ export const ItemHistorico = z.object({
   alerta: z.object({ id: z.string().uuid(), status: StatusAlerta, resposta: RespostaAlerta.nullable(), guardiao: z.string() }).nullable(),
 });
 export type ItemHistorico = z.infer<typeof ItemHistorico>;
+
+/* ---------- Treino ("vacina") ---------- */
+
+export const ResultadoTreino = z.enum(["pendente", "encaminhou", "caiu", "ignorou"]);
+export type ResultadoTreino = z.infer<typeof ResultadoTreino>;
+
+/** Modelo de golpe simulado, do JSON versionado no repositório. */
+export const ModeloTreino = z.object({
+  id: z.string().regex(/^[a-z0-9_]+$/),
+  titulo: z.string(),
+  tipo_golpe: TipoGolpe,
+  /** Mensagem simulada mostrada dentro do app, nunca por SMS ou WhatsApp. */
+  conteudo: z.string(),
+  /** O que a pessoa aprende, mostrado depois da escolha. */
+  licao: z.string(),
+});
+export type ModeloTreino = z.infer<typeof ModeloTreino>;
+
+export const EnviarTreino = z.object({ modelo: z.string().min(1) });
+export const RegistrarResultadoTreino = z.object({ resultado: z.enum(["encaminhou", "caiu", "ignorou"]) });
+
+export const TreinoDetalhe = z.object({
+  id: z.string().uuid(),
+  modelo: z.string(),
+  titulo: z.string(),
+  conteudo: z.string(),
+  licao: z.string(),
+  resultado: ResultadoTreino,
+  pontos: z.number().int(),
+  enviado_por: z.string(),
+  criado_em: z.string(),
+});
+export type TreinoDetalhe = z.infer<typeof TreinoDetalhe>;
+
+/* ---------- Golpe simulado do pitch ---------- */
+
+export const StatusPitch = z.enum(["aberta", "revelada", "encerrada"]);
+export const TipoEventoPitch = z.enum(["acessou", "confirmou"]);
+
+/** Nenhum dado pessoal: só um identificador aleatório gerado no navegador e o tipo do evento. */
+export const EventoPitch = z.object({
+  visitante_id: z.string().regex(/^[A-Za-z0-9_-]{8,64}$/),
+  tipo: TipoEventoPitch,
+});
+export type EventoPitch = z.infer<typeof EventoPitch>;
+
+export const SessaoPitch = z.object({
+  id: z.string().uuid(),
+  status: StatusPitch,
+  acessaram: z.number().int(),
+  confirmaram: z.number().int(),
+});
+export type SessaoPitch = z.infer<typeof SessaoPitch>;
 
 /* ---------- Erros da API ---------- */
 

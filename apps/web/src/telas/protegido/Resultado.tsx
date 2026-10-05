@@ -64,10 +64,11 @@ interface Props {
   ajustes: AjustesAcessibilidade;
   aoVoltar: () => void;
   aoOuvir: (texto: string) => void;
+  aoJaPaguei: () => void;
   aoAbrirAcessibilidade: () => void;
 }
 
-export function Resultado({ resultado: r, ajustes, aoVoltar, aoOuvir, aoAbrirAcessibilidade }: Props) {
+export function Resultado({ resultado: r, ajustes, aoVoltar, aoOuvir, aoJaPaguei, aoAbrirAcessibilidade }: Props) {
   const Icone = ICONES[semaforo[r.risco].icone];
   const simples = ajustes.modoSimples;
   const sinais = r.sinais.filter((s) => s.trecho !== MARCADOR_PIX);
@@ -149,6 +150,9 @@ export function Resultado({ resultado: r, ajustes, aoVoltar, aoOuvir, aoAbrirAce
             <IconeSom tamanho={24} />
             Ouvir em voz alta
           </button>
+        )}
+        {r.risco !== "verde" && (
+          <button type="button" className="botao botao--secundario" onClick={aoJaPaguei}>Já paguei, e agora?</button>
         )}
       </div>
     </main>

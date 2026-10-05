@@ -8,7 +8,8 @@
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "db:up": "docker compose up -d postgres",
-    "avaliar": "pnpm --filter @guardiao/api avaliar"
+    "avaliar": "pnpm --filter @guardiao/api avaliar",
+    "carga": "pnpm --filter @guardiao/api carga"
   },
   "devDependencies": {
     "turbo": "^2.1.3",

@@ -3,13 +3,16 @@ import {
   ConviteCriado,
   DadosSessao,
   ItemHistorico,
+  ModeloTreino,
   ResultadoAnalise,
   SessaoCriada,
+  TreinoDetalhe,
   type AceitarConvite,
   type CriarFamilia,
   type InscricaoPush,
   type Papel,
   type RespostaAlerta,
+  type TipoEntrada,
 } from "@guardiao/shared";
 import { z } from "zod";
 
@@ -55,7 +58,11 @@ export const api = {
   inscreverPush: (token: string, membroId: string, inscricao: InscricaoPush | null) => pedir("PATCH", `/membros/${membroId}`, DadosSessao, { token, corpo: { push_subscription: inscricao } }),
   chavePush: () => pedir("GET", "/push/chave-publica", z.object({ chave: z.string().nullable() })),
   /** A tela mostra o resultado ou um aviso de cautela; nunca um verde que a API não deu. */
-  analisar: (token: string, texto: string, sinal: AbortSignal) => pedir("POST", "/analises", ResultadoAnalise, { token, corpo: { tipo_entrada: "texto", texto }, sinal }),
+  analisar: (token: string, texto: string, tipo: TipoEntrada, sinal: AbortSignal) => pedir("POST", "/analises", ResultadoAnalise, { token, corpo: { tipo_entrada: tipo, texto }, sinal }),
+  modelosDeTreino: (token: string) => pedir("GET", "/treinos/modelos", z.object({ itens: z.array(ModeloTreino) }), { token }),
+  enviarTreino: (token: string, modelo: string) => pedir("POST", "/treinos", TreinoDetalhe, { token, corpo: { modelo } }),
+  treinos: (token: string) => pedir("GET", "/treinos", z.object({ itens: z.array(TreinoDetalhe) }), { token }),
+  responderTreino: (token: string, id: string, resultado: "encaminhou" | "caiu" | "ignorou") => pedir("POST", `/treinos/${id}/resultado`, TreinoDetalhe, { token, corpo: { resultado } }),
   analise: (token: string, id: string) => pedir("GET", `/analises/${id}`, ResultadoAnalise, { token }),
   historico: (token: string, familiaId: string) => pedir("GET", `/familias/${familiaId}/historico?limite=5`, z.object({ itens: z.array(ItemHistorico) }), { token }),
   alertasPendentes: (token: string) => pedir("GET", "/alertas/pendentes", z.object({ itens: z.array(AlertaDetalhe) }), { token }),

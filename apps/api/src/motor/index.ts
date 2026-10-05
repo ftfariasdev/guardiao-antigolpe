@@ -93,8 +93,10 @@ export async function analisar(entrada: EntradaMotor, deps: DependenciasMotor): 
   const sinaisRegras: SinalRegra[] = aplicarRegrasTexto(texto);
   let cnpj: InfoCnpj | null = null;
   if (dados) {
+    let cnpjNaoConferido = false;
     if (dados.tipo_chave === "cnpj" && dados.chave && deps.consultarCnpj) {
       cnpj = await deps.consultarCnpj(dados.chave).catch(() => null);
+      cnpjNaoConferido = cnpj === null;
     }
     // Um código Pix na mensagem conta como pedido de dinheiro.
     if (!sinaisRegras.some((s) => s.codigo === "pedido_dinheiro")) {
@@ -104,6 +106,16 @@ export async function analisar(entrada: EntradaMotor, deps: DependenciasMotor): 
         forca: "gatilho",
         trecho: MARCADOR_PIX,
         explicacao: "A mensagem traz um código Pix para você pagar.",
+      });
+    }
+    if (cnpjNaoConferido) {
+      // A consulta caiu ou o CNPJ não existe: a análise segue, mas diz que faltou conferir.
+      sinaisRegras.push({
+        codigo: "pix_cnpj_nao_conferido",
+        origem: "regra",
+        forca: "fraco",
+        trecho: (dados.nome_declarado ?? MARCADOR_PIX).slice(0, 200),
+        explicacao: "Não consegui conferir a empresa que vai receber este Pix.",
       });
     }
     sinaisRegras.push(

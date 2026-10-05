@@ -61,6 +61,18 @@ describe("catálogo de regras de texto", () => {
     expect(sinal("Faz um Pix de R$ 1.800 pra mim hoje?", "urgencia_dinheiro")?.trecho).toContain("pra mim hoje");
   });
 
+  it("\"responda com a senha\" é pedido de dados", () => {
+    expect(codigos("Se não foi você, responda com a senha do cartão")).toContain("pedido_dados");
+  });
+
+  it("variações comuns dos mesmos golpes também disparam", () => {
+    expect(codigos("Banco: seu cartão foi clonado, fale com o atendente")).toContain("falsa_central");
+    expect(codigos("Houve uma tentativa de empréstimo no seu nome")).toContain("falsa_central");
+    expect(codigos("Seu cartão será recolhido hoje por um motoboy credenciado")).toContain("portador_cartao");
+    expect(codigos("Entrada mínima de R$ 200 via Pix")).toContain("pedido_dinheiro");
+    expect(codigos("Seu cartão novo será entregue pelos Correios")).not.toContain("portador_cartao");
+  });
+
   it("encurtador e IP são links suspeitos", () => {
     expect(codigos("Resgate agora: bit.ly/pontos")).toContain("link_suspeito");
     expect(codigos("Acesse http://185.20.14.7/login")).toContain("link_suspeito");

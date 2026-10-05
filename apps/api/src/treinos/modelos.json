@@ -1,0 +1,30 @@
+[
+  {
+    "id": "falso_parente_numero_novo",
+    "titulo": "Falso parente com número novo",
+    "tipo_golpe": "falso_parente",
+    "conteudo": "Oi, tudo bem? Troquei de celular e esse é meu número novo, pode salvar. Tô com um problema no banco e preciso pagar uma conta hoje. Você consegue fazer um Pix de R$ 750 pra mim? Te devolvo amanhã cedo.",
+    "licao": "Quem diz que trocou de número e pede dinheiro com pressa pode não ser quem parece. Ligue para o número antigo ou pergunte a palavra-senha da família."
+  },
+  {
+    "id": "falsa_central_compra",
+    "titulo": "Falsa central do banco",
+    "tipo_golpe": "falsa_central",
+    "conteudo": "BANCO: detectamos uma compra de R$ 3.180,00 em seu cartão. Se não foi você, responda com a senha do cartão e o código que vamos enviar por SMS para cancelar agora.",
+    "licao": "Banco nenhum pede senha ou código por mensagem. Se ficar em dúvida, ligue para o número que está no verso do seu cartão."
+  },
+  {
+    "id": "link_pacote_retido",
+    "titulo": "Pacote retido com link",
+    "tipo_golpe": "link_falso",
+    "conteudo": "Seu pacote não pôde ser entregue por falta de pagamento da taxa de R$ 12,90. Regularize em até 24h: entrega-pacote-brasil.site/pagar",
+    "licao": "Link estranho com taxa pequena e prazo curto é isca. Não clique: confira a entrega no aplicativo ou site oficial."
+  },
+  {
+    "id": "emprego_tarefas",
+    "titulo": "Emprego fácil com depósito",
+    "tipo_golpe": "falso_emprego",
+    "conteudo": "Parabéns! Você foi selecionada para trabalhar de casa avaliando lojas. Ganhos de R$ 250 por dia. Para liberar seu primeiro pagamento, faça um depósito de ativação de R$ 40.",
+    "licao": "Trabalho de verdade paga você, não cobra para começar. Pedido de depósito para liberar ganho é golpe."
+  }
+]

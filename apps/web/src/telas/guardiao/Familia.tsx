@@ -1,7 +1,7 @@
-import type { AlertaDetalhe, ItemHistorico } from "@guardiao/shared";
+import type { AlertaDetalhe, ItemHistorico, ModeloTreino, TreinoDetalhe } from "@guardiao/shared";
 import { useEffect, useId, useState, type FormEvent } from "react";
 import { api, ErroApi } from "../../api";
-import { IconeAcessibilidade, IconeChave, IconeConvidar, IconeSino } from "../../componentes/Icones";
+import { Escudo, IconeAcessibilidade, IconeChave, IconeConvidar, IconeSino } from "../../componentes/Icones";
 import { ativarAvisos, avisosAtivos, temPush } from "../../push";
 import type { Sessao } from "../../sessao";
 
@@ -34,10 +34,35 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
   const [palavra, setPalavra] = useState("");
   const [recado, setRecado] = useState("");
   const idPalavra = useId();
+  const idModelo = useId();
+  const [modelos, setModelos] = useState<ModeloTreino[]>([]);
+  const [modelo, setModelo] = useState("");
+  const [ultimoTreino, setUltimoTreino] = useState<TreinoDetalhe | null>(null);
 
   useEffect(() => {
     void avisosAtivos().then((ativos) => ativos && setAvisos("ativos"));
   }, []);
+
+  useEffect(() => {
+    void api.modelosDeTreino(token).then((r) => { setModelos(r.itens); setModelo(r.itens[0]?.id ?? ""); }).catch(() => {});
+    void api.treinos(token).then((r) => setUltimoTreino(r.itens[0] ?? null)).catch(() => {});
+  }, [token]);
+
+  async function enviarTreino() {
+    try {
+      setUltimoTreino(await api.enviarTreino(token, modelo));
+      setRecado(`Treino enviado. ${protegido?.nome ?? "A pessoa protegida"} vai ver no início do app.`);
+    } catch (e) {
+      setRecado(e instanceof ErroApi ? e.message : "Não consegui enviar o treino. Tente de novo.");
+    }
+  }
+
+  const RESULTADO_TREINO: Record<TreinoDetalhe["resultado"], string> = {
+    pendente: "ainda não foi aberto",
+    encaminhou: "mostrou a mensagem ao Guardião em vez de pagar",
+    caiu: "faria o que a mensagem pedia. Vale conversar com calma",
+    ignorou: "foi ignorado",
+  };
 
   async function ligarAvisos() {
     try {
@@ -136,6 +161,20 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
           <button type="button" className="botao botao--secundario" onClick={() => setEditandoSenha(true)}>{familia.tem_palavra_senha ? "Trocar" : "Definir"}</button>
         )}
       </section>
+
+      {protegido && modelos.length > 0 && (
+        <section className="cartao" aria-labelledby="fam-treino">
+          <h2 id="fam-treino" className="subtitulo com-icone"><Escudo largura={26} /><span>Treino antigolpe: {familia.escudos} escudos</span></h2>
+          <p className="apoio">
+            {ultimoTreino ? `Último treino (${ultimoTreino.titulo}): ${RESULTADO_TREINO[ultimoTreino.resultado]}.` : `Mande um golpe de mentira para ${protegido.nome} praticar dentro do app.`}
+          </p>
+          <label className="rotulo" htmlFor={idModelo}>Qual treino enviar</label>
+          <select id={idModelo} className="campo campo--escolha" value={modelo} onChange={(e) => setModelo(e.target.value)}>
+            {modelos.map((m) => <option key={m.id} value={m.id}>{m.titulo}</option>)}
+          </select>
+          <button type="button" className="botao botao--principal" onClick={enviarTreino}>Enviar novo treino</button>
+        </section>
+      )}
 
       <section className="cartao" aria-labelledby="fam-historico">
         <h2 id="fam-historico" className="subtitulo">Últimos alertas</h2>

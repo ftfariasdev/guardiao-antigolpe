@@ -167,6 +167,7 @@ describe("Pix", () => {
   it("consulta de CNPJ fora do ar não derruba a análise", async () => {
     const r = await analisar({ tipo_entrada: "pix", texto: `Mensalidade:\n${codigo}` }, deps(null, { consultarCnpj: async () => { throw new Error("fora"); } }));
     expect(r.pix?.cnpj).toBeNull();
+    expect(r.sinais.find((s) => s.codigo === "pix_cnpj_nao_conferido")?.explicacao).toBe("Não consegui conferir a empresa que vai receber este Pix.");
   });
 });
 

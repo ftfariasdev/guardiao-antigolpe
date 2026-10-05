@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { AlertaDetalhe, DadosSessao, ResultadoAnalise, type SaidaLLM } from "@guardiao/shared";
 import type { PrismaClient } from "@prisma/client";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { emissorPitchMudo } from "./rotas/pitch.js";
 import { criarApp } from "./app.js";
 import { lerConfig } from "./config.js";
 import { escalarAlertasParados } from "./servicos/alertas.js";
@@ -24,7 +25,7 @@ describe("GET /api/v1/saude", () => {
 
   it("responde 503 quando o banco não responde", async () => {
     const semBanco = { $queryRaw: () => Promise.reject(new Error("fora")) } as unknown as PrismaClient;
-    const app = await criarApp({ config, prisma: semBanco, motor: { llm: null, timeoutLlmMs: 50 }, notificador: notificadorMudo });
+    const app = await criarApp({ config, prisma: semBanco, motor: { llm: null, timeoutLlmMs: 50 }, notificador: notificadorMudo, pitch: emissorPitchMudo });
     const r = await chamar(app, "GET", "/saude");
     expect(r.statusCode).toBe(503);
     expect(r.json()).toMatchObject({ ok: false, banco: "erro" });
@@ -260,5 +261,51 @@ describe("web push", () => {
 
   it("sem chaves VAPID o envio não faz nada", async () => {
     await expect(criarPush(prisma, null)("qualquer", alerta)).resolves.toBeUndefined();
+  });
+});
+
+describe("treino antigolpe", () => {
+  it("o guardião envia, o protegido recebe dentro do app e ganha escudos se encaminhar", async () => {
+    const { app, treinos } = await montar();
+    const { ana, cida } = await criarFamilia(app);
+    const modelos = (await chamar(app, "GET", "/treinos/modelos", ana.token)).json() as { itens: { id: string; conteudo: string }[] };
+    expect(modelos.itens.length).toBeGreaterThanOrEqual(4);
+    expect((await chamar(app, "POST", "/treinos", cida.token, { modelo: modelos.itens[0]?.id })).statusCode).toBe(403);
+
+    const enviado = await chamar(app, "POST", "/treinos", ana.token, { modelo: modelos.itens[0]?.id });
+    expect(enviado.statusCode).toBe(201);
+    const treino = enviado.json() as { id: string };
+    expect(treinos).toEqual([{ protegidoId: cida.membro.id, dados: { treino_id: treino.id, conteudo: modelos.itens[0]?.conteudo } }]);
+
+    const pendentes = (await chamar(app, "GET", "/treinos", cida.token)).json() as { itens: { resultado: string; enviado_por: string }[] };
+    expect(pendentes.itens).toMatchObject([{ resultado: "pendente", enviado_por: "Ana" }]);
+
+    expect((await chamar(app, "POST", `/treinos/${treino.id}/resultado`, ana.token, { resultado: "encaminhou" })).statusCode).toBe(403);
+    const feito = await chamar(app, "POST", `/treinos/${treino.id}/resultado`, cida.token, { resultado: "encaminhou" });
+    expect(feito.json()).toMatchObject({ resultado: "encaminhou", pontos: 10 });
+    // Vale uma vez só: não dá para somar pontos repetindo.
+    expect((await chamar(app, "POST", `/treinos/${treino.id}/resultado`, cida.token, { resultado: "encaminhou" })).statusCode).toBe(409);
+    expect((await chamar(app, "GET", "/sessao", ana.token)).json()).toMatchObject({ familia: { escudos: 10 } });
+  });
+
+  it("cair no treino não dá pontos, e treino inexistente ou de outra família é recusado", async () => {
+    const { app } = await montar();
+    const a = await criarFamilia(app);
+    const b = await criarFamilia(app);
+    expect((await chamar(app, "POST", "/treinos", a.ana.token, { modelo: "nao_existe" })).statusCode).toBe(400);
+    const treino = (await chamar(app, "POST", "/treinos", a.ana.token, { modelo: "falsa_central_compra" })).json() as { id: string };
+    expect((await chamar(app, "POST", `/treinos/${treino.id}/resultado`, b.cida.token, { resultado: "caiu" })).statusCode).toBe(404);
+    expect((await chamar(app, "POST", `/treinos/${treino.id}/resultado`, a.cida.token, { resultado: "caiu" })).json()).toMatchObject({ resultado: "caiu", pontos: 0 });
+    expect((await chamar(app, "GET", "/sessao", a.ana.token)).json()).toMatchObject({ familia: { escudos: 0 } });
+  });
+
+  it("os golpes simulados do treino são reconhecidos pelo próprio motor", async () => {
+    const { app } = await montar();
+    const { ana, cida } = await criarFamilia(app);
+    const { itens } = (await chamar(app, "GET", "/treinos/modelos", ana.token)).json() as { itens: { id: string; conteudo: string }[] };
+    for (const modelo of itens) {
+      const r = (await chamar(app, "POST", "/analises", cida.token, { texto: modelo.conteudo })).json() as ResultadoAnalise;
+      expect(r.risco, modelo.id).toBe("vermelho");
+    }
   });
 });

@@ -3,6 +3,8 @@ import { criarApp } from "./app.js";
 import { lerConfig } from "./config.js";
 import { iniciarEscalonamento } from "./jobs/escalonamento.js";
 import { criarProvedorAnthropic } from "./motor/llm/anthropic.js";
+import { criarConsultaCnpj } from "./servicos/cnpj.js";
+import { emissorPitchMudo, type EmissorPitch } from "./rotas/pitch.js";
 import { notificadorMudo, type Notificador } from "./tempo-real/notificador.js";
 import { criarPush } from "./tempo-real/push.js";
 import { criarTempoReal } from "./tempo-real/socket.js";
@@ -21,9 +23,17 @@ const notificador: Notificador = {
   alertaNovo: (guardiaoId, dados) => tempoReal.alertaNovo(guardiaoId, dados),
   alertaRespondido: (familiaId, dados) => tempoReal.alertaRespondido(familiaId, dados),
   alertaEscalado: (familiaId, dados) => tempoReal.alertaEscalado(familiaId, dados),
+  treinoNovo: (protegidoId, dados) => tempoReal.treinoNovo(protegidoId, dados),
 };
 
-const app = await criarApp({ config, prisma, motor: { llm, timeoutLlmMs: config.LLM_TIMEOUT_MS }, notificador });
+let pitchAoVivo: EmissorPitch = emissorPitchMudo;
+const pitch: EmissorPitch = {
+  contador: (id) => pitchAoVivo.contador(id),
+  revelar: (id) => pitchAoVivo.revelar(id),
+  reset: (id) => pitchAoVivo.reset(id),
+};
+
+const app = await criarApp({ config, prisma, pitch, motor: { llm, timeoutLlmMs: config.LLM_TIMEOUT_MS, consultarCnpj: criarConsultaCnpj() }, notificador });
 
 const vapid =
   config.VAPID_PUBLIC_KEY && config.VAPID_PRIVATE_KEY
@@ -31,6 +41,7 @@ const vapid =
     : null;
 const socket = criarTempoReal(app.server, prisma, config.CORS_ORIGINS, criarPush(prisma, vapid));
 tempoReal = socket.notificador;
+pitchAoVivo = socket.pitch;
 const pararEscalonamento = iniciarEscalonamento(prisma, notificador, config.ESCALONAMENTO_MIN, app.log);
 
 await app.listen({ port: config.PORT, host: "0.0.0.0" });

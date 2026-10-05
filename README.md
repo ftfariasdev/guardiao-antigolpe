@@ -65,8 +65,8 @@ pnpm --filter @guardiao/pitch dev                  # http://localhost:5174
 
 - App: https://guardiao-antigolpe.vercel.app
 - API: https://api-production-c752.up.railway.app/api/v1/saude
+- Pitch: https://guardiao-pitch.vercel.app
 
-Cada push na `main` publica o app na Vercel e a API no Railway; as migrações rodam no pré-deploy da API.
-O pitch não é publicado: roda só no notebook do palco.
+Cada push na `main` publica na Vercel (app e pitch) e no Railway (API); as migrações rodam no pré-deploy da API.
 
 Contexto completo, regras e links da documentação em [CLAUDE.md](./CLAUDE.md).

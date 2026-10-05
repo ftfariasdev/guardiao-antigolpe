@@ -164,6 +164,14 @@ describe("Pix", () => {
     expect(r.acao).not.toContain("Quando abrir o app");
   });
 
+  it("CNPJ de empresa real e antiga não está na lista de chaves denunciadas", async () => {
+    const bb = gerarBRCode({ chave: "00000000000191", nome: "BANCO DO BRASIL SA", cidade: "BRASILIA", valor: 150 });
+    const empresa = { razao_social: "BANCO DO BRASIL SA", data_abertura: "1966-08-01", situacao: "ATIVA" };
+    const r = await analisar({ tipo_entrada: "pix", texto: `Segue o Pix da fatura do banco, vence dia 20.\n${bb}` }, deps(llmQue(async () => verde), { consultarCnpj: async () => empresa }));
+    expect(r.sinais.map((s) => s.codigo)).toEqual(["pedido_dinheiro"]);
+    expect(r.risco).toBe("verde");
+  });
+
   it("consulta de CNPJ fora do ar não derruba a análise", async () => {
     const r = await analisar({ tipo_entrada: "pix", texto: `Mensalidade:\n${codigo}` }, deps(null, { consultarCnpj: async () => { throw new Error("fora"); } }));
     expect(r.pix?.cnpj).toBeNull();

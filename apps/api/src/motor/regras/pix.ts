@@ -27,8 +27,11 @@ export interface ContextoPix {
 
 const DIAS_CNPJ_RECENTE = 90;
 
-/** Lista fictícia no MVP (doc do motor); a chave é a usada na demonstração. */
-export const CHAVES_DENUNCIADAS_DEMO: ReadonlySet<string> = new Set(["golpe@exemplo.com.br", "00000000000191"]);
+/**
+ * Lista fictícia no MVP (doc do motor). Só chaves que não existem de verdade: e-mail em domínio
+ * de exemplo e uma chave aleatória inventada. Nunca colocar CPF, CNPJ ou telefone reais aqui.
+ */
+export const CHAVES_DENUNCIADAS_DEMO: ReadonlySet<string> = new Set(["golpe@exemplo.com.br", "0f3c1e9a-demo-4b7d-8a2e-chavedenunciada"]);
 
 /** Ramo citado na mensagem → palavras que o nome do recebedor deveria ter. */
 const RAMOS: { rotulo: string; citacao: RegExp; esperado: RegExp }[] = [

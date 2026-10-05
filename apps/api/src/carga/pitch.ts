@@ -95,12 +95,14 @@ const esperado = { acessaram: VISITANTES, confirmaram: Math.ceil(VISITANTES / 2)
 
 instanteRevelar = performance.now();
 await admin(`/pitch/sessoes/${sessao.id}/revelar`);
-for (let i = 0; i < 50 && revelados < conectados; i++) await esperar(100);
+// Espera até 15 s para distinguir "chegou devagar" de "não chegou".
+for (let i = 0; i < 150 && revelados < conectados; i++) await esperar(100);
 
 console.log(`Conexões abertas ao mesmo tempo: ${conectados}/${VISITANTES} (p95 para conectar: ${Math.round(p95(latenciasConexao))} ms)`);
 console.log(`Eventos aceitos: ${latenciasEvento.length}/${esperado.acessaram + esperado.confirmaram} (p95: ${Math.round(p95(latenciasEvento))} ms)`);
 console.log(`Placar no painel: ${ultimoPlacar.acessaram} acessaram, ${ultimoPlacar.confirmaram} confirmaram (esperado ${esperado.acessaram} e ${esperado.confirmaram})`);
-console.log(`Revelação recebida por ${revelados}/${conectados} celulares (o mais lento em ${Math.round(Math.max(0, ...temposRevelar))} ms)`);
+const mediana = [...temposRevelar].sort((a, b) => a - b)[Math.floor(temposRevelar.length / 2)] ?? 0;
+console.log(`Revelação recebida por ${revelados}/${conectados} celulares (mediana ${Math.round(mediana)} ms, p95 ${Math.round(p95(temposRevelar))} ms, o mais lento em ${Math.round(Math.max(0, ...temposRevelar))} ms)`);
 console.log(`Duração total: ${((performance.now() - inicioGeral) / 1000).toFixed(1)} s`);
 for (const [motivo, vezes] of erros) console.log(`  ! ${vezes}x ${motivo}`);
 

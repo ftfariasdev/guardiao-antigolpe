@@ -71,6 +71,6 @@ pnpm carga                      # teste de carga do pitch: 300 conexões (precis
 - [ ] D2: motor (normalização, regras, LLM, fusão) + script de avaliação no CI
 - [x] D3: telas do protegido (início, análise, resultados) com acessibilidade
 - [x] D4: família, convite por QR, alertas em tempo real, push e escalonamento
-- [ ] D5: Pix + CNPJ, treino, "Já paguei"; medição ampliada; teste de carga com 300 conexões
+- [x] D5: Pix + CNPJ, treino, "Já paguei"; medição ampliada; teste de carga com 300 conexões
 - [ ] D6: congelar funcionalidades; esqueleto do pitch; vídeo de backup
 - [ ] D7: cenas 3D, modo leve, PDF; ensaios

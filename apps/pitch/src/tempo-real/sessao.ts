@@ -42,9 +42,17 @@ export function usePitch(ativo: boolean) {
     let vivo = true;
     (async () => {
       try {
+        const buscar = (caminho: string) => fetch(`${API_URL}/api/v1/pitch/sessoes/${caminho}`).then((r) => (r.ok ? (r.json() as Promise<SessaoPitch>) : null));
         let id = localStorage.getItem(CHAVE);
-        const existente = id ? await fetch(`${API_URL}/api/v1/pitch/sessoes/${id}`).then((r) => (r.ok ? (r.json() as Promise<SessaoPitch>) : null)) : null;
-        const sessao = existente ?? (await admin("/pitch/sessoes"));
+        let sessao: SessaoPitch | null;
+        if (ADMIN_TOKEN) {
+          sessao = (id ? await buscar(id) : null) ?? (await admin("/pitch/sessoes"));
+        } else {
+          // Sem o token (pitch publicado) não dá para criar sessão: acompanha a que estiver aberta,
+          // a mesma do link curto "/#pitch". Revelar e zerar continuam só com o token.
+          sessao = await buscar("atual");
+          if (!sessao) throw new Error("nenhuma sessão aberta");
+        }
         id = sessao.id;
         localStorage.setItem(CHAVE, id);
         if (!vivo) return;
@@ -60,7 +68,7 @@ export function usePitch(ativo: boolean) {
         s.on("pitch:revelar", () => setEstado((e) => ({ ...e, revelado: true })));
         s.on("pitch:reset", () => setEstado((e) => ({ ...e, revelado: false })));
       } catch (erro) {
-        const motivo = ADMIN_TOKEN ? `API fora do ar (${(erro as Error).message})` : "falta VITE_ADMIN_TOKEN no .env.local";
+        const motivo = ADMIN_TOKEN ? `API fora do ar (${(erro as Error).message})` : `sem VITE_ADMIN_TOKEN e ${(erro as Error).message}`;
         if (vivo) setEstado((e) => ({ ...e, conexao: "ensaio", aviso: `Sem sessão ao vivo: ${motivo}. Mostrando os dados do ensaio.` }));
       }
     })();
@@ -73,7 +81,7 @@ export function usePitch(ativo: boolean) {
   const revelar = useCallback(async () => {
     // A tela do palco revela na hora; os celulares, quando o servidor confirmar.
     setEstado((e) => ({ ...e, revelado: true }));
-    if (estado.sessao) await admin(`/pitch/sessoes/${estado.sessao}/revelar`).catch(() => setEstado((e) => ({ ...e, aviso: "Não consegui revelar nos celulares." })));
+    if (estado.sessao) await admin(`/pitch/sessoes/${estado.sessao}/revelar`).catch(() => setEstado((e) => ({ ...e, aviso: ADMIN_TOKEN ? "Não consegui revelar nos celulares." : "Sem VITE_ADMIN_TOKEN: a revelação ficou só nesta tela." })));
   }, [estado.sessao]);
 
   const zerar = useCallback(async () => {

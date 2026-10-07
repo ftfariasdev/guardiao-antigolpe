@@ -60,6 +60,7 @@ pnpm carga                      # teste de carga do pitch: 300 conexões (precis
 - A conta (e-mail e senha) é uma tabela própria (`contas`) e não exige família: a pessoa cria a conta e depois cria uma família ou entra em uma por convite. Decisões de 06 e 07/10/2026, que substituem o "sem senha" do doc de arquitetura.
 - Rotas: `POST /contas` cria, `POST /sessoes` entra, `DELETE /sessao` sai, `PUT /conta` cria o login de quem já está na família sem conta. `POST /familias` e `POST /convites/:token/aceitar` com a sessão de uma conta sem família ligam o membro novo a ela. Uma conta fica em uma família só.
 - `GET /sessao` devolve a família ou `{ sem_familia: true, conta }`; as rotas da família respondem 403 `sem_familia` para quem ainda não tem uma.
+- Um guardião muda o papel de qualquer pessoa da família (`PUT /membros/:id/papel`), inclusive o próprio. A família nunca fica sem guardião; continuam valendo 1 protegido e até 3 guardiões.
 - A pessoa protegida continua entrando só por convite, sem senha e sem "Sair".
 - O e-mail nunca volta nas respostas da API; o erro de login é sempre o mesmo. Trocar e recuperar senha ficaram fora do MVP.
 - Menu de acesso rápido (`componentes/Menu.tsx`) para os dois perfis; as molduras de demonstração do pitch (`?perfil=`) não mostram o menu.

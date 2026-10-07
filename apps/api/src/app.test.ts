@@ -160,6 +160,61 @@ describe("conta com e-mail e senha", () => {
   });
 });
 
+describe("gerenciar a família: quem é guardião e quem é protegido", () => {
+  const mudar = (app: Parameters<typeof chamar>[0], token: string, id: string, papel: "protegido" | "guardiao") => chamar(app, "PUT", `/membros/${id}/papel`, token, { papel });
+  const papeis = async () => (await prisma.membro.findMany({ orderBy: { criadoEm: "asc" } })).map((m) => `${m.nome}:${m.papel}:${m.ordem}`);
+
+  it("o guardião troca os papéis: a protegida vira guardiã e outro guardião vira protegido", async () => {
+    const { app } = await montar();
+    const { ana, cida, pedro } = await criarFamilia(app, { segundoGuardiao: true });
+    const r = await mudar(app, ana.token, cida.membro.id, "guardiao");
+    expect(r.statusCode).toBe(200);
+    expect(DadosSessao.parse(r.json()).familia.membros.find((m) => m.nome === "Dona Cida")).toMatchObject({ papel: "guardiao", ordem: 3 });
+    expect((await mudar(app, ana.token, (pedro as { membro: { id: string } }).membro.id, "protegido")).statusCode).toBe(200);
+    expect(await papeis()).toEqual(["Ana:guardiao:1", "Dona Cida:guardiao:2", "Pedro:protegido:1"]);
+    // Cada um passa a enxergar o app do novo papel.
+    expect(DadosSessao.parse((await chamar(app, "GET", "/sessao", cida.token)).json()).membro.papel).toBe("guardiao");
+  });
+
+  it("a família nunca fica sem guardião nem com duas pessoas protegidas", async () => {
+    const { app } = await montar();
+    const { ana, pedro } = await criarFamilia(app, { segundoGuardiao: true });
+    const comProtegida = await mudar(app, ana.token, (pedro as { membro: { id: string } }).membro.id, "protegido");
+    expect(comProtegida.statusCode).toBe(409);
+    expect(comProtegida.json()).toMatchObject({ erro: { codigo: "familia_cheia" } });
+    const sozinha = await montar();
+    const so = (await chamar(sozinha.app, "POST", "/familias", undefined, { nome_familia: "Família Souza", nome: "Bia" })).json() as { token: string; membro: { id: string } };
+    const ultimo = await mudar(sozinha.app, so.token, so.membro.id, "protegido");
+    expect(ultimo.statusCode).toBe(409);
+    expect(ultimo.json()).toMatchObject({ erro: { codigo: "ultimo_guardiao" } });
+  });
+
+  it("o guardião pode virar a pessoa protegida se sobrar outro guardião", async () => {
+    const { app } = await montar();
+    const { ana, cida } = await criarFamilia(app, { segundoGuardiao: true });
+    await mudar(app, ana.token, cida.membro.id, "guardiao");
+    const r = await mudar(app, ana.token, ana.membro.id, "protegido");
+    expect(r.statusCode).toBe(200);
+    expect(DadosSessao.parse(r.json()).membro.papel).toBe("protegido");
+    expect(await papeis()).toEqual(["Ana:protegido:1", "Dona Cida:guardiao:2", "Pedro:guardiao:1"]);
+    // Já como protegida, Ana não muda mais o papel de ninguém.
+    expect((await mudar(app, ana.token, cida.membro.id, "protegido")).statusCode).toBe(403);
+  });
+
+  it("só guardião muda papéis, só na própria família, e no máximo 3 guardiões", async () => {
+    const { app } = await montar();
+    const { ana, cida, familiaId } = await criarFamilia(app, { segundoGuardiao: true });
+    expect((await mudar(app, cida.token, cida.membro.id, "guardiao")).statusCode).toBe(403);
+    const outra = (await chamar(app, "POST", "/familias", undefined, { nome_familia: "Família Souza", nome: "Bia" })).json() as { token: string };
+    expect((await mudar(app, outra.token, cida.membro.id, "guardiao")).statusCode).toBe(404);
+    const convite = (await chamar(app, "POST", `/familias/${familiaId}/convites`, ana.token, { papel: "guardiao" })).json() as { token: string };
+    await chamar(app, "POST", `/convites/${convite.token}/aceitar`, undefined, { nome: "Lia" });
+    const cheia = await mudar(app, ana.token, cida.membro.id, "guardiao");
+    expect(cheia.statusCode).toBe(409);
+    expect((await mudar(app, ana.token, cida.membro.id, "banana" as "guardiao")).statusCode).toBe(400);
+  });
+});
+
 describe("família, sessão e convites", () => {
   it("criar a família devolve o token uma vez e guarda só o SHA-256 dele", async () => {
     const { app } = await montar();

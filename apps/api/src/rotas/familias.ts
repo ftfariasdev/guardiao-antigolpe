@@ -1,5 +1,5 @@
 import { hash, verify } from "@node-rs/argon2";
-import { AceitarConvite, AtualizarMembro, CriarConta, CriarConvite, CriarFamilia, DefinirConta, DefinirPalavraSenha, Entrar, type ConviteCriado, type ItemHistorico, type SessaoAberta, type SessaoAtual, type SessaoCriada } from "@guardiao/shared";
+import { AceitarConvite, AtualizarMembro, MudarPapel, CriarConta, CriarConvite, CriarFamilia, DefinirConta, DefinirPalavraSenha, Entrar, type ConviteCriado, type ItemHistorico, type SessaoAberta, type SessaoAtual, type SessaoCriada } from "@guardiao/shared";
 import { Prisma, type Conta, type Membro, type PrismaClient } from "@prisma/client";
 import type { FastifyPluginAsync, FastifyRequest } from "fastify";
 import { donoDoToken, ErroHttp, exigirFamilia, exigirPapel, exigirSessao, tokenDoPedido, validar } from "../autenticacao.js";
@@ -166,6 +166,34 @@ export const rotasFamilias =
       // argon2id (padrão da biblioteca); só escrita, nunca leitura.
       await prisma.familia.update({ where: { id: req.params.id }, data: { palavraSenhaHash: await hash(palavra.toLowerCase()) } });
       return res.status(204).send();
+    });
+
+    /**
+     * Um guardião muda o papel de alguém da família (inclusive o próprio).
+     * A família nunca fica sem guardião, e os limites do MVP continuam: 1 protegido e até 3 guardiões.
+     */
+    app.put<{ Params: { id: string } }>("/membros/:id/papel", sessao, async (req) => {
+      exigirPapel(req, "guardiao");
+      const { papel } = validar(MudarPapel, req.body, "Diga se a pessoa passa a ser protegida ou guardiã.");
+      const familiaId = req.membro.familiaId;
+      await prisma.$transaction(async (tx) => {
+        const membros = await tx.membro.findMany({ where: { familiaId }, orderBy: [{ ordem: "asc" }, { criadoEm: "asc" }] });
+        const alvo = membros.find((m) => m.id === req.params.id);
+        if (!alvo) throw new ErroHttp(404, "nao_encontrado", "Não encontrado.");
+        if (alvo.papel === papel) return;
+        const guardioes = membros.filter((m) => m.papel === "guardiao");
+        if (papel === "protegido") {
+          if (guardioes.length < 2) throw new ErroHttp(409, "ultimo_guardiao", "A família precisa de pelo menos um guardião. Convide outro antes de mudar.");
+          if (membros.some((m) => m.papel === "protegido")) throw new ErroHttp(409, "familia_cheia", "A família já tem uma pessoa protegida. Mude ela para guardiã antes.");
+        } else if (guardioes.length >= MAXIMO_GUARDIOES) {
+          throw new ErroHttp(409, "familia_cheia", `A família já tem ${MAXIMO_GUARDIOES} guardiões.`);
+        }
+        await tx.membro.update({ where: { id: alvo.id }, data: { papel, ordem: 1 } });
+        // Quem vira guardião entra no fim da fila de avisos; a fila fica sempre 1, 2, 3.
+        const fila = [...guardioes.filter((g) => g.id !== alvo.id), ...(papel === "guardiao" ? [alvo] : [])];
+        for (const [i, g] of fila.entries()) await tx.membro.update({ where: { id: g.id }, data: { ordem: i + 1 } });
+      });
+      return dadosDaSessao(prisma, await prisma.membro.findUniqueOrThrow({ where: { id: req.membro.id } }));
     });
 
     app.patch<{ Params: { id: string } }>("/membros/:id", sessao, async (req) => {

@@ -192,6 +192,10 @@ export const AtualizarMembro = z
   .partial();
 export type AtualizarMembro = z.infer<typeof AtualizarMembro>;
 
+/** Um guardião decide quem na família é guardião e quem é a pessoa protegida. */
+export const MudarPapel = z.object({ papel: Papel });
+export type MudarPapel = z.infer<typeof MudarPapel>;
+
 /* ---------- Alertas ---------- */
 
 export const StatusAlerta = z.enum(["enviado", "visto", "respondido", "expirado"]);

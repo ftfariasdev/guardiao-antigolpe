@@ -1,4 +1,4 @@
-import type { AlertaDetalhe, ItemHistorico, ModeloTreino, TreinoDetalhe } from "@guardiao/shared";
+import type { AlertaDetalhe, ItemHistorico, MembroResumo, ModeloTreino, Papel, TreinoDetalhe } from "@guardiao/shared";
 import { useEffect, useId, useState, type FormEvent } from "react";
 import { api, ErroApi } from "../../api";
 import { Escudo, IconeAcessibilidade, IconeChave, IconeConvidar, IconeSino } from "../../componentes/Icones";
@@ -77,6 +77,25 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
     }
   }
 
+  /** Troca o papel de alguém da família. Mudar o próprio papel muda o app que a pessoa vê. */
+  async function mudarPapel(alvo: MembroResumo, papel: Papel) {
+    const eEu = alvo.id === membro.id;
+    const pergunta =
+      papel === "protegido"
+        ? eEu
+          ? "Você passa a ser a pessoa protegida e deixa de receber os alertas. Continuar?"
+          : `${alvo.nome} passa a ser a pessoa protegida e deixa de receber os alertas. Continuar?`
+        : `${alvo.nome} passa a ser guardião e a receber os alertas. A família fica sem pessoa protegida até você definir outra. Continuar?`;
+    if (!window.confirm(pergunta)) return;
+    try {
+      await api.mudarPapel(token, alvo, papel);
+      setRecado(papel === "protegido" ? `${eEu ? "Você" : alvo.nome} agora é a pessoa protegida.` : `${alvo.nome} agora é guardião.`);
+      aoMudarFamilia();
+    } catch (e) {
+      setRecado(e instanceof ErroApi ? e.message : "Não consegui mudar. Tente de novo.");
+    }
+  }
+
   async function criarConta(evento: FormEvent) {
     evento.preventDefault();
     try {
@@ -137,6 +156,9 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
             <li className="membro">
               <span className="membro__inicial membro__inicial--protegido" aria-hidden="true">{protegido.nome[0]?.toUpperCase()}</span>
               <span><strong>{protegido.nome}</strong><br /><span className="apoio">Pessoa protegida</span></span>
+              {guardioes.length < 3 && (
+                <button type="button" className="botao botao--secundario botao--compacto membro__acao" onClick={() => mudarPapel(protegido, "guardiao")}>Tornar guardião</button>
+              )}
             </li>
           )}
           {guardioes.map((g, i) => (
@@ -146,9 +168,21 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
                 <strong>{g.nome}{g.id === membro.id ? " (você)" : ""}</strong><br />
                 <span className="apoio">{g.parentesco ? `${g.parentesco[0]?.toUpperCase()}${g.parentesco.slice(1)}, ` : ""}{ORDINAL[i]} pessoa a ser avisada</span>
               </span>
+              {!protegido && guardioes.length > 1 && (
+                <button type="button" className="botao botao--secundario botao--compacto membro__acao" onClick={() => mudarPapel(g, "protegido")}>Tornar protegido</button>
+              )}
             </li>
           ))}
         </ul>
+        <p className="apoio">
+          {protegido
+            ? guardioes.length < 3
+              ? "Para trocar quem é a pessoa protegida, torne-a guardiã e depois escolha outra pessoa."
+              : "Com 3 guardiões a família está completa: não dá para mudar os papéis."
+            : guardioes.length > 1
+              ? "Escolha quem é a pessoa protegida, ou convide alguém."
+              : "Convide a pessoa que você quer proteger."}
+        </p>
         {!protegido && (
           <button type="button" className="botao botao--principal" onClick={() => aoConvidar("protegido")}><IconeConvidar tamanho={22} />Convidar a pessoa protegida</button>
         )}

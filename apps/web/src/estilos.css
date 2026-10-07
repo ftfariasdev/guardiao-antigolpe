@@ -144,6 +144,9 @@ h1:focus { outline: none; } /* o título recebe o foco só para o leitor de tela
 .guardioes > li { flex: 1 1 140px; }
 .membro { display: flex; flex-direction: row; align-items: center; gap: 12px; line-height: 1.25; }
 .membro__inicial { flex: none; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: var(--raio-pilula); background: var(--cor-marca); color: var(--cor-sobre-marca); font-weight: 700; }
+.membro { flex-wrap: wrap; }
+.membro > span:nth-child(2) { flex: 1 1 8rem; min-width: 0; }
+.membro__acao { flex: none; margin-left: auto; font-size: 1rem; }
 .membro__inicial--protegido { background: var(--cor-texto); color: var(--cor-fundo); }
 .historico li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; }
 .historico li + li { padding-top: 12px; border-top: 1px solid var(--cor-borda); }

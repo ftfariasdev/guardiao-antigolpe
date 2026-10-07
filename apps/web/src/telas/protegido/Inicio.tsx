@@ -22,7 +22,7 @@ export function Inicio({ sessao, treino, aoColar, aoLerQr, aoAbrirConversa, aoAb
   const SAUDACAO = `Olá, ${sessao.membro.nome}`;
   const guardioes = sessao.familia.membros.filter((m) => m.papel === "guardiao");
   return (
-    <main className="tela">
+    <main className="tela tela--larga">
       <Cabecalho aoAbrirAcessibilidade={aoAbrirAcessibilidade} aoOuvir={() => aoOuvir(`${SAUDACAO} ${CHAMADA} Toque em Colar mensagem.`)} />
       <div className="bloco">
         <h1 className="titulo" tabIndex={-1}>{SAUDACAO}</h1>

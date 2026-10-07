@@ -87,7 +87,7 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
   }
 
   return (
-    <main className="tela">
+    <main className="tela tela--larga">
       <header className="cabecalho">
         <div className="bloco bloco--junto">
           <h1 className="titulo titulo--menor" tabIndex={-1}>{familia.nome}</h1>

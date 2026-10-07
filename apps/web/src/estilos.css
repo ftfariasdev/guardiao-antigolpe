@@ -6,7 +6,7 @@
 body { margin: 0; min-height: 100dvh; background: var(--cor-fundo); }
 h1, h2, p, ul, ol, dl, dd { margin: 0; padding: 0; }
 ul, ol { list-style: none; }
-button, textarea { font: inherit; letter-spacing: inherit; color: inherit; }
+button, textarea, input, select { font: inherit; letter-spacing: inherit; color: inherit; }
 button { cursor: pointer; }
 h1:focus { outline: none; } /* o título recebe o foco só para o leitor de tela */
 
@@ -198,3 +198,48 @@ h1:focus { outline: none; } /* o título recebe o foco só para o leitor de tela
 
 /* Folha de compartilhar da conversa de demonstração: presa ao pé da tela, como no celular. */
 .folha { position: fixed; left: 0; right: 0; bottom: 0; z-index: 2; border-radius: var(--raio-medio) var(--raio-medio) 0 0; padding-bottom: calc(20px + env(safe-area-inset-bottom)); box-shadow: 0 -8px 24px rgb(14 26 61 / 0.25); }
+
+/* ---------- Computador e notebook (tela larga) ----------
+   No celular tudo é uma coluna de 480 px. A partir de 960 px a coluna alarga, os títulos crescem e
+   os botões deixam de esticar de ponta a ponta. As telas com vários cartões (início, resultado,
+   família e alerta) usam `tela--larga`: uma grade de duas colunas em que cabeçalho, títulos e
+   semáforo ocupam a largura toda e os cartões ficam lado a lado.
+   Os tamanhos mínimos de texto e de alvo de toque não mudam. */
+@media (min-width: 960px) {
+  .tela:not(.isca) { max-width: 760px; padding: 40px 40px 56px; gap: 28px; }
+  .cabecalho { padding-bottom: 8px; }
+  .titulo { font-size: min(2.1rem, 52px); }
+  .titulo--menor { font-size: min(1.7rem, 44px); }
+  .cartao { padding: 24px 28px; }
+  .semaforo { padding: 28px 32px; }
+  .semaforo__palavra { font-size: min(1.9rem, 48px); }
+  .semaforo__frase { max-width: 44em; }
+
+  /* Botão solto numa coluna larga fica do tamanho do texto, alinhado à esquerda. */
+  .tela:not(.isca) > .botao, .tela:not(.isca) > .bloco > .botao, .tela:not(.isca) > form > .botao { width: auto; min-width: min(100%, 320px); align-self: flex-start; padding-left: 40px; padding-right: 40px; }
+  .tela:not(.isca) > div.bloco.botao--fim { flex-direction: row; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+  .tela:not(.isca) > div.bloco.botao--fim > .botao { min-width: 0; min-height: 3.6rem; padding-left: 32px; padding-right: 32px; }
+  .botao--fim { margin-top: 0; }
+
+  .guardioes > li { flex: 0 1 320px; }
+  .camera { width: min(100%, 600px); aspect-ratio: 4 / 3; align-self: center; }
+  .qr__codigo { width: min(100%, 340px); }
+  .folha { left: 50%; right: auto; width: min(100%, 560px); transform: translateX(-50%); }
+
+  .tela.tela--larga { max-width: 1120px; padding-left: 56px; padding-right: 56px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 32px; align-content: start; align-items: start; }
+  .tela.tela--larga > * { grid-column: 1 / -1; }
+  /* Lado a lado: cartões, botões soltos e o bloco de resposta do guardião. */
+  .tela.tela--larga > .cartao, .tela.tela--larga > .botao, .tela.tela--larga > .bloco:has(> .botao) { grid-column: auto; align-self: stretch; }
+  .tela.tela--larga > .botao, .tela.tela--larga > .bloco:not(.botao--fim) > .botao { width: 100%; }
+  .tela.tela--larga > .bloco.botao--fim, .tela.tela--larga > .cartao:has(.sinais), .tela.tela--larga > .cartao:has(.historico) { grid-column: 1 / -1; }
+  .tela.tela--larga .sinais { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 40px; }
+  .tela.tela--larga .sinais li + li { padding-top: 0; border-top: 0; }
+}
+
+/* Com mouse, o que é clicável reage ao passar por cima. */
+@media (hover: hover) {
+  .botao:not(:disabled), .botao-redondo, .cartao--botao, .alerta-pendente, .nivel { transition: transform var(--duracao-curta) var(--curva-padrao), filter var(--duracao-curta) var(--curva-padrao), border-color var(--duracao-curta) var(--curva-padrao); }
+  .botao--principal:not(:disabled):hover, .botao--perigo:not(:disabled):hover { filter: brightness(1.1); }
+  .botao--secundario:not(:disabled):hover, .botao-redondo:hover, .cartao--botao:hover, .nivel:hover { border-color: var(--cor-marca); }
+  .alerta-pendente:hover { filter: brightness(0.97); }
+}

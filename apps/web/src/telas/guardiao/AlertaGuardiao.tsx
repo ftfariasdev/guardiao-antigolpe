@@ -50,7 +50,7 @@ export function AlertaGuardiao({ sessao, alertaId, aoVoltar, aoResponder }: Prop
   const tipo = alerta ? NOMES[alerta.analise.tipo_golpe] : undefined;
 
   return (
-    <main className="tela">
+    <main className="tela tela--larga">
       <header className="cabecalho">
         <button type="button" className="botao-redondo" aria-label="Voltar" onClick={aoVoltar}><IconeVoltar tamanho={24} /></button>
         <h1 className="titulo titulo--menor" tabIndex={-1}>Alerta da família</h1>

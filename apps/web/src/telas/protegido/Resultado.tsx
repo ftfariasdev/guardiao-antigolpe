@@ -77,7 +77,7 @@ export function Resultado({ resultado: r, ajustes, aoVoltar, aoOuvir, aoJaPaguei
   const tituloSinais = r.risco === "vermelho" ? "Por que achamos isso" : "Pontos de atenção";
 
   return (
-    <main className="tela">
+    <main className="tela tela--larga">
       <Cabecalho aoAbrirAcessibilidade={aoAbrirAcessibilidade} />
 
       {r.alerta?.resposta && <EstadoDoAlerta alerta={r.alerta} />}

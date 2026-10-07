@@ -70,11 +70,11 @@ function Brinde({ pitch }: PropsSlide) {
     <div className="slide slide--isca">
       <div className="coluna">
         <p className="isca__selo">Só para quem está nesta palestra</p>
-        <h1 className="isca__titulo">Os 10 primeiros a confirmar ganham um fone Bluetooth</h1>
+        <h1 className="isca__titulo">Participe do sorteio desta palestra</h1>
         <p className="isca__texto">Aponte a câmera do celular para o código.</p>
         <p className="isca__link">Ou digite: {semProtocolo(APP_URL)}/#pitch</p>
       </div>
-      <div className="cartao-qr"><Qr url={linkDoSimulador(pitch.sessao)} rotulo="QR Code do brinde" /></div>
+      <div className="cartao-qr"><Qr url={linkDoSimulador(pitch.sessao)} rotulo="QR Code do sorteio" /></div>
     </div>
   );
 }

@@ -15,7 +15,7 @@ function idDoVisitante(): string {
 }
 
 const LICOES = [
-  "Prêmio para “os primeiros” e contagem regressiva são iscas para você agir sem pensar.",
+  "Sorteio surpresa e contagem regressiva são iscas para você agir sem pensar.",
   "Pix de 1 centavo “para validar” é um golpe comum.",
   "Antes de pagar, pergunte ao Guardião.",
 ];
@@ -88,20 +88,20 @@ export function Simulador({ sessaoId }: { sessaoId: string }) {
   // Visual de propósito diferente do Guardião: precisa parecer um aviso comum de evento.
   return (
     <main className="tela isca">
-      <p className="isca__marca"><span className="isca__icone" aria-hidden="true">★</span>Brinde do Evento</p>
+      <p className="isca__marca"><span className="isca__icone" aria-hidden="true">★</span>Sorteio do Evento</p>
       <p className="isca__selo">Só para quem está nesta palestra</p>
       <div className="bloco">
-        <h1 className="isca__titulo" tabIndex={-1}>Os 10 primeiros a confirmar ganham um fone Bluetooth</h1>
-        <p className="isca__texto">Para validar, confirme um Pix de R$ 0,01 em 1 toque. A retirada é no fim da palestra.</p>
+        <h1 className="isca__titulo" tabIndex={-1}>Participe do sorteio desta palestra</h1>
+        <p className="isca__texto">Para validar sua participação, confirme um Pix de R$ 0,01 em 1 toque. O resultado sai no fim da palestra.</p>
       </div>
       <div className="isca__urgencia">
-        <p><strong>Restam 3 de 10</strong><span className="valor">expira em {relogio}</span></p>
+        <p><strong>Inscrições abertas</strong><span className="valor">encerram em {relogio}</span></p>
         <div className="isca__barra" aria-hidden="true"><span /></div>
-        <p>7 pessoas já garantiram o delas</p>
+        <p>Muita gente desta sala já confirmou</p>
       </div>
       <p className="isca__chave"><IconeCheck tamanho={22} />Sua chave Pix foi encontrada automaticamente</p>
-      <button type="button" className="isca__botao botao--fim" onClick={confirmar}>Confirmar e garantir o meu</button>
-      <p className="isca__letrinha">Válido só para os 10 primeiros. Ao confirmar, você aceita os termos.</p>
+      <button type="button" className="isca__botao botao--fim" onClick={confirmar}>Confirmar e participar</button>
+      <p className="isca__letrinha">Participação só durante a palestra. Ao confirmar, você aceita os termos.</p>
     </main>
   );
 }

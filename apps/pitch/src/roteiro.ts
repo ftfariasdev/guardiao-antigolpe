@@ -15,7 +15,7 @@ export interface Slide {
 }
 
 export const roteiro: Slide[] = [
-  { id: "brinde", inicio: "0:00", titulo: "Os 10 primeiros a confirmar ganham um fone Bluetooth", notas: "Antes de começar, um recado: os 10 primeiros que confirmarem ganham um fone. Escaneiem aí.", aoVivo: true },
+  { id: "brinde", inicio: "0:00", titulo: "Participe do sorteio desta palestra", notas: "Antes de começar, um recado: tem um sorteio para quem está nesta sala. Escaneiem aí para participar.", aoVivo: true },
   { id: "painel", inicio: "0:40", titulo: "Quantas pessoas caíram?", notas: "Olha quantos já confirmaram. (Aperte R para revelar ao passar para o próximo.)", aoVivo: true },
   { id: "revelacao", inicio: "1:00", titulo: "Isso foi apenas uma simulação.", notas: "[N] de vocês caíram em menos de um minuto. Ninguém aqui é ingênuo: o golpe funciona porque explora a pressa.", legenda: "O golpe funciona porque explora a pressa.", cena3d: true, aoVivo: true },
   { id: "24-milhoes", inicio: "1:15", titulo: "24 milhões", notas: "24 milhões de brasileiros caíram em golpe de Pix ou boleto em um ano.", legenda: "de brasileiros caíram em golpe de Pix ou boleto em um ano" },

@@ -96,6 +96,34 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
     }
   }
 
+  /** Sobe a pessoa uma posição na fila de avisos. */
+  async function avisarAntes(alvo: MembroResumo, posicao: number) {
+    try {
+      await api.mudarOrdem(token, alvo, posicao);
+      setRecado(`${alvo.nome} agora é a ${ORDINAL[posicao - 1]} pessoa a ser avisada.`);
+      aoMudarFamilia();
+    } catch (e) {
+      setRecado(e instanceof ErroApi ? e.message : "Não consegui mudar a ordem. Tente de novo.");
+    }
+  }
+
+  async function remover(alvo: MembroResumo) {
+    const eEu = alvo.id === membro.id;
+    const pergunta = eEu
+      ? "Sair da família? Você deixa de receber os alertas."
+      : alvo.papel === "protegido"
+        ? `Remover ${alvo.nome} da família? As mensagens analisadas e os alertas dela são apagados.`
+        : `Remover ${alvo.nome} da família? Essa pessoa deixa de receber os alertas.`;
+    if (!window.confirm(pergunta)) return;
+    try {
+      await api.removerMembro(token, alvo);
+      if (!eEu) setRecado(`${alvo.nome} saiu da família.`);
+      aoMudarFamilia();
+    } catch (e) {
+      setRecado(e instanceof ErroApi ? e.message : "Não consegui remover. Tente de novo.");
+    }
+  }
+
   async function criarConta(evento: FormEvent) {
     evento.preventDefault();
     try {
@@ -156,9 +184,12 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
             <li className="membro">
               <span className="membro__inicial membro__inicial--protegido" aria-hidden="true">{protegido.nome[0]?.toUpperCase()}</span>
               <span><strong>{protegido.nome}</strong><br /><span className="apoio">Pessoa protegida</span></span>
-              {guardioes.length < 3 && (
-                <button type="button" className="botao botao--secundario botao--compacto membro__acao" onClick={() => mudarPapel(protegido, "guardiao")}>Tornar guardião</button>
-              )}
+              <span className="membro__acoes">
+                {guardioes.length < 3 && (
+                  <button type="button" className="botao botao--secundario botao--compacto" onClick={() => mudarPapel(protegido, "guardiao")}>Tornar guardião</button>
+                )}
+                <button type="button" className="botao botao--secundario botao--compacto" aria-label={`Remover ${protegido.nome} da família`} onClick={() => remover(protegido)}>Remover</button>
+              </span>
             </li>
           )}
           {guardioes.map((g, i) => (
@@ -168,8 +199,16 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
                 <strong>{g.nome}{g.id === membro.id ? " (você)" : ""}</strong><br />
                 <span className="apoio">{g.parentesco ? `${g.parentesco[0]?.toUpperCase()}${g.parentesco.slice(1)}, ` : ""}{ORDINAL[i]} pessoa a ser avisada</span>
               </span>
-              {!protegido && guardioes.length > 1 && (
-                <button type="button" className="botao botao--secundario botao--compacto membro__acao" onClick={() => mudarPapel(g, "protegido")}>Tornar protegido</button>
+              {guardioes.length > 1 && (
+                <span className="membro__acoes">
+                  {i > 0 && (
+                    <button type="button" className="botao botao--secundario botao--compacto" aria-label={`Avisar ${g.nome} antes de ${guardioes[i - 1]?.nome}`} onClick={() => avisarAntes(g, i)}>Avisar antes</button>
+                  )}
+                  {!protegido && <button type="button" className="botao botao--secundario botao--compacto" onClick={() => mudarPapel(g, "protegido")}>Tornar protegido</button>}
+                  <button type="button" className="botao botao--secundario botao--compacto" aria-label={g.id === membro.id ? "Sair da família" : `Remover ${g.nome} da família`} onClick={() => remover(g)}>
+                    {g.id === membro.id ? "Sair da família" : "Remover"}
+                  </button>
+                </span>
               )}
             </li>
           ))}

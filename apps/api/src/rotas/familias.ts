@@ -168,6 +168,38 @@ export const rotasFamilias =
       return res.status(204).send();
     });
 
+    const emOrdem = { orderBy: [{ ordem: "asc" as const }, { criadoEm: "asc" as const }] };
+
+    /** Grava a fila de avisos como 1, 2, 3, na ordem recebida. */
+    async function gravarFila(tx: Prisma.TransactionClient, fila: Membro[]) {
+      for (const [i, g] of fila.entries()) await tx.membro.update({ where: { id: g.id }, data: { ordem: i + 1 } });
+    }
+
+    /** Alertas ainda sem resposta de quem deixa de ser guardião passam para o primeiro da fila que ficou. */
+    async function repassarAlertasAbertos(tx: Prisma.TransactionClient, deId: string, fila: Membro[]) {
+      const herdeiro = fila[0];
+      if (herdeiro) await tx.alerta.updateMany({ where: { membroId: deId, status: { in: ["enviado", "visto"] } }, data: { membroId: herdeiro.id, status: "enviado" } });
+    }
+
+    /**
+     * Um guardião tira alguém da família, ou sai dela. O histórico de análises e alertas da pessoa
+     * é apagado junto; a conta dela, se houver, continua e volta a ficar sem família.
+     */
+    app.delete<{ Params: { id: string } }>("/membros/:id", sessao, async (req, res) => {
+      exigirPapel(req, "guardiao");
+      await prisma.$transaction(async (tx) => {
+        const membros = await tx.membro.findMany({ where: { familiaId: req.membro.familiaId }, ...emOrdem });
+        const alvo = membros.find((m) => m.id === req.params.id);
+        if (!alvo) throw new ErroHttp(404, "nao_encontrado", "Não encontrado.");
+        const fila = membros.filter((m) => m.papel === "guardiao" && m.id !== alvo.id);
+        if (fila.length === 0) throw new ErroHttp(409, "ultimo_guardiao", "A família precisa de pelo menos um guardião. Convide outro antes de sair.");
+        if (alvo.papel === "guardiao") await repassarAlertasAbertos(tx, alvo.id, fila);
+        await tx.membro.delete({ where: { id: alvo.id } });
+        await gravarFila(tx, fila);
+      });
+      return res.status(204).send();
+    });
+
     /**
      * Um guardião muda o papel de alguém da família (inclusive o próprio).
      * A família nunca fica sem guardião, e os limites do MVP continuam: 1 protegido e até 3 guardiões.
@@ -177,7 +209,7 @@ export const rotasFamilias =
       const { papel } = validar(MudarPapel, req.body, "Diga se a pessoa passa a ser protegida ou guardiã.");
       const familiaId = req.membro.familiaId;
       await prisma.$transaction(async (tx) => {
-        const membros = await tx.membro.findMany({ where: { familiaId }, orderBy: [{ ordem: "asc" }, { criadoEm: "asc" }] });
+        const membros = await tx.membro.findMany({ where: { familiaId }, ...emOrdem });
         const alvo = membros.find((m) => m.id === req.params.id);
         if (!alvo) throw new ErroHttp(404, "nao_encontrado", "Não encontrado.");
         if (alvo.papel === papel) return;
@@ -191,7 +223,8 @@ export const rotasFamilias =
         await tx.membro.update({ where: { id: alvo.id }, data: { papel, ordem: 1 } });
         // Quem vira guardião entra no fim da fila de avisos; a fila fica sempre 1, 2, 3.
         const fila = [...guardioes.filter((g) => g.id !== alvo.id), ...(papel === "guardiao" ? [alvo] : [])];
-        for (const [i, g] of fila.entries()) await tx.membro.update({ where: { id: g.id }, data: { ordem: i + 1 } });
+        if (papel === "protegido") await repassarAlertasAbertos(tx, alvo.id, fila);
+        await gravarFila(tx, fila);
       });
       return dadosDaSessao(prisma, await prisma.membro.findUniqueOrThrow({ where: { id: req.membro.id } }));
     });
@@ -206,15 +239,24 @@ export const rotasFamilias =
       if (dados.push_subscription !== undefined && !eEu) throw new ErroHttp(403, "sem_permissao", "Cada pessoa ativa os avisos no próprio aparelho.");
       if (dados.ordem !== undefined && !souGuardiao) throw new ErroHttp(403, "sem_permissao", "Só um guardião muda a ordem dos avisos.");
       if (dados.acessibilidade !== undefined && !eEu && !souGuardiao) throw new ErroHttp(403, "sem_permissao", "Sem permissão.");
+      if (dados.ordem !== undefined) {
+        // Mudar a ordem move a pessoa na fila de avisos e renumera os outros guardiões.
+        const posicao = dados.ordem;
+        if (alvo.papel !== "guardiao") throw new ErroHttp(400, "requisicao_invalida", "Só guardiões têm ordem de aviso.");
+        await prisma.$transaction(async (tx) => {
+          const outros = (await tx.membro.findMany({ where: { familiaId: alvo.familiaId, papel: "guardiao" }, ...emOrdem })).filter((g) => g.id !== alvo.id);
+          outros.splice(Math.min(posicao - 1, outros.length), 0, alvo);
+          await gravarFila(tx, outros);
+        });
+      }
       const atualizado = await prisma.membro.update({
         where: { id: alvo.id },
         data: {
-          ...(dados.ordem !== undefined ? { ordem: dados.ordem } : {}),
           ...(dados.push_subscription !== undefined ? { pushSubscription: (dados.push_subscription ?? null) as Prisma.InputJsonValue } : {}),
           ...(dados.acessibilidade !== undefined ? { acessibilidade: dados.acessibilidade as Prisma.InputJsonValue } : {}),
         },
       });
-      return dadosDaSessao(prisma, atualizado.id === req.membro.id ? atualizado : req.membro);
+      return dadosDaSessao(prisma, atualizado.id === req.membro.id ? atualizado : await prisma.membro.findUniqueOrThrow({ where: { id: req.membro.id } }));
     });
 
     app.get<{ Params: { id: string }; Querystring: { limite?: string; antes_de?: string } }>("/familias/:id/historico", sessao, async (req) => {

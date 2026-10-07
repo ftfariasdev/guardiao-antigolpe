@@ -215,6 +215,84 @@ describe("gerenciar a família: quem é guardião e quem é protegido", () => {
   });
 });
 
+describe("gerenciar a família: remover alguém e mudar a ordem dos avisos", () => {
+  type App = Parameters<typeof chamar>[0];
+  const fila = async () => (await prisma.membro.findMany({ where: { papel: "guardiao" }, orderBy: { ordem: "asc" } })).map((m) => `${m.ordem}:${m.nome}`);
+  const comTres = async (app: App) => {
+    const f = await criarFamilia(app, { segundoGuardiao: true });
+    const convite = (await chamar(app, "POST", `/familias/${f.familiaId}/convites`, f.ana.token, { papel: "guardiao" })).json() as { token: string };
+    const lia = (await chamar(app, "POST", `/convites/${convite.token}/aceitar`, undefined, { nome: "Lia" })).json() as { token: string; membro: { id: string } };
+    return { ...f, pedro: f.pedro as NonNullable<typeof f.pedro>, lia };
+  };
+
+  it("mudar a ordem move a pessoa na fila e renumera os outros", async () => {
+    const { app } = await montar();
+    const { ana, lia } = await comTres(app);
+    expect(await fila()).toEqual(["1:Ana", "2:Pedro", "3:Lia"]);
+    const r = await chamar(app, "PATCH", `/membros/${lia.membro.id}`, ana.token, { ordem: 1 });
+    expect(r.statusCode).toBe(200);
+    expect(await fila()).toEqual(["1:Lia", "2:Ana", "3:Pedro"]);
+    expect(DadosSessao.parse(r.json()).membro).toMatchObject({ nome: "Ana", ordem: 2 });
+    await chamar(app, "PATCH", `/membros/${lia.membro.id}`, ana.token, { ordem: 3 });
+    expect(await fila()).toEqual(["1:Ana", "2:Pedro", "3:Lia"]);
+  });
+
+  it("a ordem nova vale para o próximo alerta; pessoa protegida não tem ordem", async () => {
+    const { app, novos } = await montar();
+    const { ana, cida, pedro } = await criarFamilia(app, { segundoGuardiao: true });
+    await chamar(app, "PATCH", `/membros/${(pedro as { membro: { id: string } }).membro.id}`, ana.token, { ordem: 1 });
+    await chamar(app, "POST", "/analises", cida.token, { tipo_entrada: "texto", texto: GOLPE });
+    expect(novos.map((n) => n.guardiaoId)).toEqual([(pedro as { membro: { id: string } }).membro.id]);
+    expect((await chamar(app, "PATCH", `/membros/${cida.membro.id}`, ana.token, { ordem: 1 })).statusCode).toBe(400);
+    expect((await chamar(app, "PATCH", `/membros/${ana.membro.id}`, cida.token, { ordem: 2 })).statusCode).toBe(403);
+  });
+
+  it("remover um guardião fecha a fila e passa os alertas abertos dele para o primeiro que ficou", async () => {
+    const { app } = await montar();
+    const { ana, cida, pedro, lia } = await comTres(app);
+    await chamar(app, "PATCH", `/membros/${pedro.membro.id}`, ana.token, { ordem: 1 });
+    await chamar(app, "POST", "/analises", cida.token, { tipo_entrada: "texto", texto: GOLPE });
+    expect((await prisma.alerta.findFirstOrThrow()).membroId).toBe(pedro.membro.id);
+    expect((await chamar(app, "DELETE", `/membros/${pedro.membro.id}`, ana.token)).statusCode).toBe(204);
+    expect(await fila()).toEqual(["1:Ana", "2:Lia"]);
+    expect(await prisma.alerta.findMany()).toMatchObject([{ membroId: ana.membro.id, status: "enviado" }]);
+    expect((await chamar(app, "GET", "/sessao", pedro.token)).statusCode).toBe(401);
+    expect((await chamar(app, "GET", "/sessao", lia.token)).statusCode).toBe(200);
+  });
+
+  it("remover a pessoa protegida apaga as análises dela e libera a vaga", async () => {
+    const { app } = await montar();
+    const { ana, cida, familiaId } = await criarFamilia(app);
+    await chamar(app, "POST", "/analises", cida.token, { tipo_entrada: "texto", texto: GOLPE });
+    expect((await chamar(app, "DELETE", `/membros/${cida.membro.id}`, ana.token)).statusCode).toBe(204);
+    expect([await prisma.analise.count(), await prisma.alerta.count()]).toEqual([0, 0]);
+    expect((await chamar(app, "POST", `/familias/${familiaId}/convites`, ana.token, { papel: "protegido" })).statusCode).toBe(201);
+  });
+
+  it("o último guardião não sai; quem sai com conta volta a ficar sem família", async () => {
+    const { app } = await montar();
+    const conta = (await chamar(app, "POST", "/contas", undefined, { nome: "Ana", email: "ana@exemplo.com.br", senha: "senha-da-ana-1" })).json() as { token: string };
+    const ana = (await chamar(app, "POST", "/familias", conta.token, { nome_familia: "Família Silva", nome: "Ana" })).json() as { membro: { id: string }; familia: { id: string } };
+    const sozinha = await chamar(app, "DELETE", `/membros/${ana.membro.id}`, conta.token);
+    expect(sozinha.statusCode).toBe(409);
+    expect(sozinha.json()).toMatchObject({ erro: { codigo: "ultimo_guardiao" } });
+    const convite = (await chamar(app, "POST", `/familias/${ana.familia.id}/convites`, conta.token, { papel: "guardiao" })).json() as { token: string };
+    await chamar(app, "POST", `/convites/${convite.token}/aceitar`, undefined, { nome: "Pedro" });
+    expect((await chamar(app, "DELETE", `/membros/${ana.membro.id}`, conta.token)).statusCode).toBe(204);
+    expect((await chamar(app, "GET", "/sessao", conta.token)).json()).toEqual({ sem_familia: true, conta: { nome: "Ana" } });
+    expect(await fila()).toEqual(["1:Pedro"]);
+  });
+
+  it("só guardião remove, e só na própria família", async () => {
+    const { app } = await montar();
+    const { ana, cida } = await criarFamilia(app, { segundoGuardiao: true });
+    expect((await chamar(app, "DELETE", `/membros/${ana.membro.id}`, cida.token)).statusCode).toBe(403);
+    const outra = (await chamar(app, "POST", "/familias", undefined, { nome_familia: "Família Souza", nome: "Bia" })).json() as { token: string };
+    expect((await chamar(app, "DELETE", `/membros/${cida.membro.id}`, outra.token)).statusCode).toBe(404);
+    expect(await prisma.membro.count()).toBe(4);
+  });
+});
+
 describe("família, sessão e convites", () => {
   it("criar a família devolve o token uma vez e guarda só o SHA-256 dele", async () => {
     const { app } = await montar();

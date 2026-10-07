@@ -38,6 +38,94 @@ describe("lerConfig", () => {
   });
 });
 
+describe("conta do guardião: e-mail e senha", () => {
+  const CONTA = { nome_familia: "Família Silva", nome: "Ana", parentesco: "filha", email: "Ana@Exemplo.com.br", senha: "senha-da-ana-1" };
+  const entrar = (app: Parameters<typeof chamar>[0], email: string, senha: string) => chamar(app, "POST", "/sessoes", undefined, { email, senha });
+
+  it("criar a família com e-mail e senha guarda a senha só como argon2id e nunca devolve o e-mail", async () => {
+    const { app } = await montar();
+    const r = await chamar(app, "POST", "/familias", undefined, CONTA);
+    expect(r.statusCode).toBe(201);
+    expect(r.json()).toMatchObject({ tem_conta: true });
+    expect(r.body).not.toContain("exemplo.com.br");
+    const membro = await prisma.membro.findFirstOrThrow();
+    expect(membro.email).toBe("ana@exemplo.com.br");
+    expect(membro.senhaHash).toMatch(/^\$argon2id\$/);
+    expect(membro.senhaHash).not.toContain(CONTA.senha);
+  });
+
+  it("entrar abre uma sessão nova, com o e-mail em qualquer caixa", async () => {
+    const { app } = await montar();
+    const criada = (await chamar(app, "POST", "/familias", undefined, CONTA)).json() as { token: string };
+    const r = await entrar(app, "ANA@exemplo.com.br", CONTA.senha);
+    expect(r.statusCode).toBe(201);
+    const sessao = r.json() as { token: string; membro: { nome: string } };
+    expect(sessao.membro.nome).toBe("Ana");
+    expect(sessao.token).not.toBe(criada.token);
+    expect((await chamar(app, "GET", "/sessao", sessao.token)).statusCode).toBe(200);
+    expect(await prisma.sessao.count()).toBe(2);
+  });
+
+  it("senha errada, e-mail desconhecido e corpo inválido dão o mesmo 401", async () => {
+    const { app } = await montar();
+    await chamar(app, "POST", "/familias", undefined, CONTA);
+    const respostas = [await entrar(app, CONTA.email, "senha-errada-1"), await entrar(app, "ninguem@exemplo.com.br", CONTA.senha), await entrar(app, "isso não é e-mail", "")];
+    expect(respostas.map((r) => r.statusCode)).toEqual([401, 401, 401]);
+    expect(new Set(respostas.map((r) => r.body)).size).toBe(1);
+  });
+
+  it("quem não tem senha não entra por e-mail", async () => {
+    const { app } = await montar();
+    await criarFamilia(app);
+    await prisma.membro.updateMany({ where: { nome: "Ana" }, data: { email: "ana@exemplo.com.br" } });
+    expect((await entrar(app, "ana@exemplo.com.br", "qualquer-senha")).statusCode).toBe(401);
+  });
+
+  it("o mesmo e-mail não cria duas contas", async () => {
+    const { app } = await montar();
+    await chamar(app, "POST", "/familias", undefined, CONTA);
+    const r = await chamar(app, "POST", "/familias", undefined, { ...CONTA, email: "ana@exemplo.com.br" });
+    expect(r.statusCode).toBe(409);
+    expect(r.json()).toMatchObject({ erro: { codigo: "email_em_uso" } });
+    expect(await prisma.familia.count()).toBe(1);
+  });
+
+  it("e-mail sem senha, ou senha curta, é recusado", async () => {
+    const { app } = await montar();
+    const { senha: _senha, ...semSenha } = CONTA;
+    expect((await chamar(app, "POST", "/familias", undefined, semSenha)).statusCode).toBe(400);
+    expect((await chamar(app, "POST", "/familias", undefined, { ...CONTA, senha: "curta" })).statusCode).toBe(400);
+  });
+
+  it("sair apaga só a sessão deste aparelho", async () => {
+    const { app } = await montar();
+    const primeira = (await chamar(app, "POST", "/familias", undefined, CONTA)).json() as { token: string };
+    const segunda = (await entrar(app, CONTA.email, CONTA.senha)).json() as { token: string };
+    expect((await chamar(app, "DELETE", "/sessao", segunda.token)).statusCode).toBe(204);
+    expect((await chamar(app, "GET", "/sessao", segunda.token)).statusCode).toBe(401);
+    expect((await chamar(app, "GET", "/sessao", primeira.token)).statusCode).toBe(200);
+  });
+
+  it("o navegador de outro domínio pode chamar o Sair (DELETE liberado no CORS)", async () => {
+    const { app } = await montar();
+    const r = await app.inject({ method: "OPTIONS", url: "/api/v1/sessao", headers: { origin: config.CORS_ORIGINS[0] ?? "http://localhost:5173", "access-control-request-method": "DELETE" } });
+    expect(String(r.headers["access-control-allow-methods"])).toContain("DELETE");
+  });
+
+  it("o guardião que entrou sem senha cria o login depois; a pessoa protegida não", async () => {
+    const { app } = await montar();
+    const { ana, cida } = await criarFamilia(app);
+    expect(ana.tem_conta).toBe(false);
+    const conta = { email: "ana@exemplo.com.br", senha: "senha-da-ana-1" };
+    expect((await chamar(app, "PUT", "/conta", cida.token, conta)).statusCode).toBe(403);
+    const r = await chamar(app, "PUT", "/conta", ana.token, conta);
+    expect(r.statusCode).toBe(200);
+    expect(r.json()).toMatchObject({ tem_conta: true });
+    expect((await entrar(app, conta.email, conta.senha)).statusCode).toBe(201);
+    expect((await chamar(app, "PUT", "/conta", ana.token, { ...conta, senha: "outra-senha-22" })).statusCode).toBe(409);
+  });
+});
+
 describe("família, sessão e convites", () => {
   it("criar a família devolve o token uma vez e guarda só o SHA-256 dele", async () => {
     const { app } = await montar();

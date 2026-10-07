@@ -36,7 +36,7 @@ export async function montar(motor: DependenciasMotor = { llm: null, timeoutLlmM
   return { app, ...espiao };
 }
 
-export function chamar(app: FastifyInstance, metodo: "GET" | "POST" | "PUT" | "PATCH", url: string, token?: string, payload?: object) {
+export function chamar(app: FastifyInstance, metodo: "GET" | "POST" | "PUT" | "PATCH" | "DELETE", url: string, token?: string, payload?: object) {
   return app.inject({ method: metodo, url: `/api/v1${url}`, headers: token ? { authorization: `Bearer ${token}` } : {}, payload });
 }
 

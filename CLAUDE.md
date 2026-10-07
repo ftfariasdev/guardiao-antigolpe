@@ -49,11 +49,18 @@ pnpm carga                      # teste de carga do pitch: 300 conexões (precis
 2. **Fusão:** o risco final é o maior entre regras e LLM (`maiorRisco` em `@guardiao/shared`).
 3. **Nunca mandar pagar.** O app nunca instrui a pagar; o desbloqueio vem do guardião ("Seu guardião verificou").
 4. **Privacidade:** mídia original nunca é gravada em disco; CPF, cartão, telefone e e-mail são mascarados antes do LLM; logs sem dados pessoais.
-5. **Segredos:** tokens de sessão e convite guardados só como SHA-256; palavra-senha com argon2id e nunca lida de volta; chaves de API só na API.
+5. **Segredos:** tokens de sessão e convite guardados só como SHA-256; palavra-senha e senha do guardião com argon2id e nunca lidas de volta; chaves de API só na API.
 6. **Sinais do LLM** precisam citar um trecho que existe no texto; senão são descartados.
 7. **Semáforo** sempre com ícone + palavra, nunca só cor. Verde, âmbar e vermelho nunca aparecem na marca.
 8. **Acessibilidade (WCAG 2.1 AA):** texto do protegido ≥ 20 px, alvos de toque ≥ 48 px, rótulos em todo botão, resultado anunciado com `aria-live`, ajustes de texto/contraste/movimento via atributos `data-*` de `tokens.css`.
 9. **Golpe simulado do pitch:** nenhum campo que envie dados; só eventos anônimos (`visitante_id` aleatório).
+
+## Conta e acesso
+
+- O guardião tem conta com e-mail e senha (`POST /familias` cria, `POST /sessoes` entra, `DELETE /sessao` sai, `PUT /conta` cria o login de quem entrou por convite). Decisão de 06/10/2026, que substitui o "sem senha" do doc de arquitetura.
+- A pessoa protegida continua entrando só por convite, sem senha e sem "Sair".
+- O e-mail nunca volta nas respostas da API; o erro de login é sempre o mesmo. Trocar e recuperar senha ficaram fora do MVP.
+- Menu de acesso rápido (`componentes/Menu.tsx`) para os dois perfis; as molduras de demonstração do pitch (`?perfil=`) não mostram o menu.
 
 ## Convenções
 

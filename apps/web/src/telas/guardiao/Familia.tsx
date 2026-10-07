@@ -34,6 +34,10 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
   const [palavra, setPalavra] = useState("");
   const [recado, setRecado] = useState("");
   const idPalavra = useId();
+  const idEmail = useId();
+  const idSenha = useId();
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
   const idModelo = useId();
   const [modelos, setModelos] = useState<ModeloTreino[]>([]);
   const [modelo, setModelo] = useState("");
@@ -70,6 +74,19 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
       setAvisos(r === "ativado" ? "ativos" : r === "negado" ? "negados" : "indisponiveis");
     } catch {
       setRecado("Não consegui ativar os avisos agora. Tente de novo.");
+    }
+  }
+
+  async function criarConta(evento: FormEvent) {
+    evento.preventDefault();
+    try {
+      await api.definirConta(token, { email: email.trim(), senha });
+      setEmail("");
+      setSenha("");
+      setRecado("Pronto. Agora você entra em qualquer aparelho com esse e-mail e senha.");
+      aoMudarFamilia();
+    } catch (e) {
+      setRecado(e instanceof ErroApi ? e.message : "Não consegui criar o login. Tente de novo.");
     }
   }
 
@@ -139,6 +156,20 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
           <button type="button" className="botao botao--secundario" onClick={() => aoConvidar("guardiao")}><IconeConvidar tamanho={22} />Convidar guardião</button>
         )}
       </section>
+
+      {!sessao.tem_conta && (
+        <section className="cartao cartao--destaque" aria-labelledby="fam-conta">
+          <h2 id="fam-conta" className="subtitulo">Crie seu e-mail e senha</h2>
+          <p className="apoio">Hoje você só entra por este aparelho. Com e-mail e senha você entra em qualquer um.</p>
+          <form className="bloco" onSubmit={criarConta}>
+            <label className="rotulo" htmlFor={idEmail}>E-mail</label>
+            <input id={idEmail} className="campo campo--linha" type="email" inputMode="email" value={email} maxLength={120} autoComplete="email" autoCapitalize="none" spellCheck={false} onChange={(e) => setEmail(e.target.value)} />
+            <label className="rotulo" htmlFor={idSenha}>Senha (pelo menos 8 letras ou números)</label>
+            <input id={idSenha} className="campo campo--linha" type="password" value={senha} minLength={8} maxLength={100} autoComplete="new-password" onChange={(e) => setSenha(e.target.value)} />
+            <button type="submit" className="botao botao--principal" disabled={!email.includes("@") || senha.length < 8}>Criar login</button>
+          </form>
+        </section>
+      )}
 
       <section className="cartao" aria-labelledby="fam-avisos">
         <h2 id="fam-avisos" className="subtitulo com-icone"><span className="selo" aria-hidden="true"><IconeSino tamanho={22} /></span><span>Avisos neste aparelho</span></h2>

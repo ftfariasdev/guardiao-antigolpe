@@ -199,6 +199,21 @@ h1:focus { outline: none; } /* o título recebe o foco só para o leitor de tela
 /* Folha de compartilhar da conversa de demonstração: presa ao pé da tela, como no celular. */
 .folha { position: fixed; left: 0; right: 0; bottom: 0; z-index: 2; border-radius: var(--raio-medio) var(--raio-medio) 0 0; padding-bottom: calc(20px + env(safe-area-inset-bottom)); box-shadow: 0 -8px 24px rgb(14 26 61 / 0.25); }
 
+/* ---------- Menu de acesso rápido ----------
+   No celular: um botão "Menu" que abre a lista. No computador: a lista em linha, sempre à vista. */
+.menu { max-width: 480px; margin: 0 auto; padding: 16px 24px 0; }
+.menu + .tela { min-height: calc(100dvh - 80px); padding-top: 16px; }
+.menu__abrir { display: flex; align-items: center; gap: 10px; min-height: max(2.6rem, var(--alvo-toque)); padding: 6px 20px 6px 16px; border-radius: var(--raio-pilula); border: var(--largura-borda) solid var(--cor-borda); background: var(--cor-superficie); color: var(--cor-texto); font-weight: 700; }
+.menu__abrir svg { color: var(--cor-marca); }
+.menu__lista { display: none; flex-direction: column; gap: 8px; margin-top: 12px; }
+.menu--aberto .menu__lista { display: flex; }
+.menu__item { display: flex; align-items: center; gap: 12px; width: 100%; min-height: max(2.8rem, var(--alvo-toque)); padding: 8px 18px; border-radius: 14px; border: var(--largura-borda) solid var(--cor-borda); background: var(--cor-superficie); color: var(--cor-texto); font-weight: 700; text-align: left; }
+.menu__item svg { flex: none; color: var(--cor-marca); }
+.menu__item[aria-current="page"] { background: var(--cor-marca); border-color: var(--cor-marca); color: var(--cor-sobre-marca); }
+.menu__item[aria-current="page"] svg { color: inherit; }
+.menu__item[aria-current="page"] .escudo__corpo { fill: var(--cor-sobre-marca); }
+.menu__item[aria-current="page"] .escudo__ponto { fill: var(--cor-marca); }
+
 /* ---------- Computador e notebook (tela larga) ----------
    No celular tudo é uma coluna de 480 px. A partir de 960 px a coluna alarga, os títulos crescem e
    os botões deixam de esticar de ponta a ponta. As telas com vários cartões (início, resultado,
@@ -226,6 +241,13 @@ h1:focus { outline: none; } /* o título recebe o foco só para o leitor de tela
   .qr__codigo { width: min(100%, 340px); }
   .folha { left: 50%; right: auto; width: min(100%, 560px); transform: translateX(-50%); }
 
+  .menu { max-width: 760px; padding: 24px 40px 0; }
+  .menu--largo { max-width: 1120px; padding-left: 56px; padding-right: 56px; }
+  .menu + .tela:not(.isca) { min-height: 0; padding-top: 28px; }
+  .menu__abrir { display: none; }
+  .menu__lista { display: flex; flex-direction: row; flex-wrap: wrap; gap: 4px; margin-top: 0; padding-bottom: 20px; border-bottom: 1px solid var(--cor-borda); }
+  .menu__item { width: auto; padding: 6px 14px; border-color: transparent; background: transparent; }
+
   .tela.tela--larga { max-width: 1120px; padding-left: 56px; padding-right: 56px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 32px; align-content: start; align-items: start; }
   .tela.tela--larga > * { grid-column: 1 / -1; }
   /* Lado a lado: cartões, botões soltos e o bloco de resposta do guardião. */
@@ -240,6 +262,6 @@ h1:focus { outline: none; } /* o título recebe o foco só para o leitor de tela
 @media (hover: hover) {
   .botao:not(:disabled), .botao-redondo, .cartao--botao, .alerta-pendente, .nivel { transition: transform var(--duracao-curta) var(--curva-padrao), filter var(--duracao-curta) var(--curva-padrao), border-color var(--duracao-curta) var(--curva-padrao); }
   .botao--principal:not(:disabled):hover, .botao--perigo:not(:disabled):hover { filter: brightness(1.1); }
-  .botao--secundario:not(:disabled):hover, .botao-redondo:hover, .cartao--botao:hover, .nivel:hover { border-color: var(--cor-marca); }
+  .botao--secundario:not(:disabled):hover, .botao-redondo:hover, .cartao--botao:hover, .nivel:hover, .menu__abrir:hover, .menu__item:not([aria-current]):hover { border-color: var(--cor-marca); }
   .alerta-pendente:hover { filter: brightness(0.97); }
 }

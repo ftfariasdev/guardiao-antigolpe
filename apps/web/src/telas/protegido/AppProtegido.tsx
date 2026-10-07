@@ -8,6 +8,8 @@ import { Acessibilidade } from "./Acessibilidade";
 import { Analisando } from "./Analisando";
 import { Escrever } from "./Escrever";
 import { FALA_FALHA, Falha } from "./Falha";
+import { IconeAcessibilidade, IconeAjuda, IconeCasa, IconeColar, IconeQr } from "../../componentes/Icones";
+import { Menu, type ItemMenu } from "../../componentes/Menu";
 import { PERFIL } from "../../perfil";
 import { ConversaDemo } from "./ConversaDemo";
 import { Inicio } from "./Inicio";
@@ -152,8 +154,20 @@ export function AppProtegido({ sessao }: { sessao: Sessao }) {
 
   const guardiaoPrincipal = sessao.familia.membros.find((m) => m.papel === "guardiao")?.nome ?? null;
 
+  // A pessoa protegida não tem "Sair": ela entra por convite e ficaria sem como voltar.
+  const itens: ItemMenu[] = [
+    { id: "inicio", rotulo: "Início", icone: <IconeCasa tamanho={24} />, atual: tela === "inicio", aoEscolher: recomecar },
+    { id: "escrever", rotulo: "Colar mensagem", icone: <IconeColar tamanho={24} />, atual: tela === "escrever", aoEscolher: () => ir("escrever") },
+    { id: "qr", rotulo: "Ler QR Code", icone: <IconeQr tamanho={24} />, atual: tela === "qr", aoEscolher: () => ir("qr") },
+    { id: "ja-paguei", rotulo: "Já paguei", icone: <IconeAjuda tamanho={24} />, atual: tela === "ja-paguei", aoEscolher: abrirJaPaguei },
+    { id: "acessibilidade", rotulo: "Acessibilidade", icone: <IconeAcessibilidade tamanho={24} />, atual: tela === "acessibilidade", aoEscolher: abrirAcessibilidade },
+  ];
+  // Sem menu durante a análise e o treino (uma coisa por vez) e nas molduras de demonstração do pitch.
+  const comMenu = !PERFIL && tela !== "analisando" && tela !== "treino";
+
   return (
     <>
+      {comMenu && <Menu itens={itens} largo={tela === "inicio" || tela === "resultado"} />}
       {tela === "inicio" && <Inicio sessao={sessao} treino={treino} aoColar={() => ir("escrever")} aoLerQr={() => ir("qr")} aoAbrirConversa={PERFIL ? () => ir("conversa") : undefined} aoAbrirTreino={() => ir("treino")} aoAbrirAcessibilidade={abrirAcessibilidade} aoOuvir={ouvir} />}
       {tela === "qr" && <LerQr aoLer={(codigo) => analisar(codigo, codigo.includes("000201") ? "pix" : "link")} aoVoltar={() => window.history.back()} aoColarNoLugar={() => ir("escrever")} />}
       {tela === "conversa" && <ConversaDemo aoCompartilhar={analisar} aoVoltar={() => window.history.back()} />}

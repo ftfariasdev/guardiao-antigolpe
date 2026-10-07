@@ -93,6 +93,9 @@ model Membro {
   nome             String
   parentesco       String?
   papel            Papel
+  /// login do guardião: e-mail em minúsculas e senha com argon2id (nunca lida de volta)
+  email            String?   @unique
+  senhaHash        String?   @map("senha_hash")
   /// ordem de acionamento dos guardiões (1 = primeiro)
   ordem            Int       @default(1)
   pushSubscription Json?     @map("push_subscription")

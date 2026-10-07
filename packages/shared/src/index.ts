@@ -131,15 +131,29 @@ export const FamiliaResumo = z.object({
 });
 export type FamiliaResumo = z.infer<typeof FamiliaResumo>;
 
-export const DadosSessao = z.object({ membro: MembroResumo, familia: FamiliaResumo });
+/** `tem_conta`: a pessoa já tem e-mail e senha e consegue entrar em outro aparelho. */
+export const DadosSessao = z.object({ membro: MembroResumo, familia: FamiliaResumo, tem_conta: z.boolean() });
 export type DadosSessao = z.infer<typeof DadosSessao>;
 
 /** Resposta de criar família e de aceitar convite: o token só aparece aqui, uma vez. */
 export const SessaoCriada = DadosSessao.extend({ token: z.string().min(32) });
 export type SessaoCriada = z.infer<typeof SessaoCriada>;
 
-export const CriarFamilia = z.object({ nome_familia: Nome, nome: Nome, parentesco: Parentesco.optional() });
+/** Login do guardião. O e-mail é guardado em minúsculas; a senha, só como hash argon2id. */
+export const Email = z.string().trim().toLowerCase().email().max(120);
+export const Senha = z.string().min(8).max(100);
+
+/** E-mail e senha vêm juntos ou não vêm: sem eles a sessão vale só no aparelho que criou a família. */
+export const CriarFamilia = z
+  .object({ nome_familia: Nome, nome: Nome, parentesco: Parentesco.optional(), email: Email.optional(), senha: Senha.optional() })
+  .refine((d) => (d.email === undefined) === (d.senha === undefined), { message: "Informe e-mail e senha juntos." });
 export type CriarFamilia = z.infer<typeof CriarFamilia>;
+
+export const Entrar = z.object({ email: Email, senha: z.string().min(1).max(100) });
+export type Entrar = z.infer<typeof Entrar>;
+
+export const DefinirConta = z.object({ email: Email, senha: Senha });
+export type DefinirConta = z.infer<typeof DefinirConta>;
 
 export const CriarConvite = z.object({ papel: Papel });
 export const ConviteCriado = z.object({ token: z.string().min(32), papel: Papel, expira_em: z.string() });

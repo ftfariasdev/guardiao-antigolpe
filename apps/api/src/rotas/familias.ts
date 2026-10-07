@@ -1,12 +1,18 @@
-import { hash } from "@node-rs/argon2";
-import { AceitarConvite, AtualizarMembro, CriarConvite, CriarFamilia, DefinirPalavraSenha, type ConviteCriado, type ItemHistorico, type SessaoCriada } from "@guardiao/shared";
-import type { Prisma, PrismaClient } from "@prisma/client";
+import { hash, verify } from "@node-rs/argon2";
+import { AceitarConvite, AtualizarMembro, CriarConvite, CriarFamilia, DefinirConta, DefinirPalavraSenha, Entrar, type ConviteCriado, type ItemHistorico, type SessaoCriada } from "@guardiao/shared";
+import { Prisma, type PrismaClient } from "@prisma/client";
 import type { FastifyPluginAsync } from "fastify";
 import { ErroHttp, exigirFamilia, exigirPapel, exigirSessao, validar } from "../autenticacao.js";
 import { gerarToken, hashToken } from "../seguranca.js";
 import { dadosDaSessao, MAXIMO_GUARDIOES } from "../servicos/familia.js";
 
 const VALIDADE_CONVITE_MS = 24 * 60 * 60 * 1000;
+
+/** Hash de uma senha que ninguém tem: o login gasta o mesmo tempo quando o e-mail não existe. */
+const HASH_DE_NINGUEM = hash("senha-que-ninguem-tem");
+
+const emailJaUsado = (erro: unknown) => erro instanceof Prisma.PrismaClientKnownRequestError && erro.code === "P2002";
+const ERRO_EMAIL_EM_USO = new ErroHttp(409, "email_em_uso", "Este e-mail já tem conta. Use Entrar.");
 
 export const rotasFamilias =
   (prisma: PrismaClient): FastifyPluginAsync =>
@@ -20,12 +26,48 @@ export const rotasFamilias =
     }
 
     app.post("/familias", { config: { rateLimit: { max: 10, timeWindow: "1 minute" } } }, async (req, res) => {
-      const dados = validar(CriarFamilia, req.body, "Informe o nome da família e o seu nome.");
-      const familia = await prisma.familia.create({
-        data: { nome: dados.nome_familia, membros: { create: { nome: dados.nome, parentesco: dados.parentesco ?? null, papel: "guardiao", ordem: 1 } } },
-        include: { membros: true },
-      });
+      const dados = validar(CriarFamilia, req.body, "Informe o nome da família e o seu nome. A senha precisa ter pelo menos 8 letras ou números.");
+      const conta = dados.email && dados.senha ? { email: dados.email, senhaHash: await hash(dados.senha) } : {};
+      const familia = await prisma.familia
+        .create({
+          data: { nome: dados.nome_familia, membros: { create: { nome: dados.nome, parentesco: dados.parentesco ?? null, papel: "guardiao", ordem: 1, ...conta } } },
+          include: { membros: true },
+        })
+        .catch((erro: unknown) => {
+          throw emailJaUsado(erro) ? ERRO_EMAIL_EM_USO : erro;
+        });
       return res.status(201).send(await abrirSessao((familia.membros[0] as { id: string }).id));
+    });
+
+    /** Entrar com e-mail e senha: abre uma sessão nova neste aparelho. A resposta de erro é sempre a mesma. */
+    app.post("/sessoes", { config: { rateLimit: { max: 5, timeWindow: "1 minute" } } }, async (req, res) => {
+      const invalido = new ErroHttp(401, "credenciais_invalidas", "E-mail ou senha incorretos.");
+      const lido = Entrar.safeParse(req.body);
+      if (!lido.success) throw invalido;
+      const membro = await prisma.membro.findUnique({ where: { email: lido.data.email } });
+      const confere = await verify(membro?.senhaHash ?? (await HASH_DE_NINGUEM), lido.data.senha).catch(() => false);
+      if (!membro?.senhaHash || !confere) throw invalido;
+      return res.status(201).send(await abrirSessao(membro.id));
+    });
+
+    /** Sair: apaga só a sessão deste aparelho. */
+    app.delete("/sessao", sessao, async (req, res) => {
+      const token = (req.headers.authorization ?? "").slice(7).trim();
+      await prisma.sessao.deleteMany({ where: { tokenHash: hashToken(token) } });
+      return res.status(204).send();
+    });
+
+    /** Cria o login de quem entrou por convite ou criou a família sem e-mail. Trocar a senha fica fora do MVP. */
+    app.put("/conta", { ...sessao, config: { rateLimit: { max: 5, timeWindow: "1 minute" } } }, async (req) => {
+      exigirPapel(req, "guardiao");
+      const dados = validar(DefinirConta, req.body, "Informe um e-mail válido e uma senha com pelo menos 8 letras ou números.");
+      if (req.membro.senhaHash) throw new ErroHttp(409, "ja_tem_conta", "Você já tem e-mail e senha.");
+      const membro = await prisma.membro
+        .update({ where: { id: req.membro.id }, data: { email: dados.email, senhaHash: await hash(dados.senha) } })
+        .catch((erro: unknown) => {
+          throw emailJaUsado(erro) ? ERRO_EMAIL_EM_USO : erro;
+        });
+      return dadosDaSessao(prisma, membro);
     });
 
     app.get("/sessao", sessao, async (req) => dadosDaSessao(prisma, req.membro));

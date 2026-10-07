@@ -32,6 +32,8 @@ O Guardião Antigolpe é um PWA que analisa mensagens suspeitas e avisa um famil
 
 Além da análise, o app tem palavra-senha da família, convite por QR, treino com golpes simulados e o fluxo "Já paguei".
 
+O guardião cria uma conta com e-mail e senha e entra em qualquer aparelho. A pessoa protegida entra só pelo convite, sem senha.
+
 ### Garantias do projeto
 
 | Garantia | O que significa |
@@ -39,7 +41,7 @@ Além da análise, o app tem palavra-senha da família, convite por QR, treino c
 | Fail-safe | Erro, timeout ou resposta inválida do LLM resulta em no mínimo amarelo, nunca verde |
 | Nunca manda pagar | O desbloqueio vem do guardião, não do app |
 | Privacidade | CPF, cartão, telefone e e-mail são mascarados antes do LLM; a mídia original não é gravada em disco |
-| Segredos | Tokens de sessão e convite guardados só como SHA-256; palavra-senha com argon2id |
+| Segredos | Tokens de sessão e convite guardados só como SHA-256; palavra-senha e senha do guardião com argon2id |
 | Acessibilidade | WCAG 2.1 AA: texto do protegido ≥ 20 px, alvos de toque ≥ 48 px, resultado anunciado por leitor de tela |
 
 A lista completa de regras e convenções está no [CLAUDE.md](./CLAUDE.md).

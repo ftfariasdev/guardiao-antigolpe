@@ -7,6 +7,9 @@ import { Acessibilidade } from "../protegido/Acessibilidade";
 import { AlertaGuardiao } from "./AlertaGuardiao";
 import { Convite } from "./Convite";
 import { Familia } from "./Familia";
+import { Escudo, IconeAcessibilidade, IconeCasa, IconeChave, IconeConvidar, IconeSair, IconeSino } from "../../componentes/Icones";
+import { Menu, type ItemMenu } from "../../componentes/Menu";
+import { PERFIL } from "../../perfil";
 
 type Tela = { nome: "familia" } | { nome: "convite"; papel: Papel } | { nome: "alerta"; id: string } | { nome: "acessibilidade" };
 
@@ -19,7 +22,7 @@ function telaDoEndereco(): Tela {
   return { nome: "familia" };
 }
 
-export function AppGuardiao({ sessao, aoMudarFamilia }: { sessao: Sessao; aoMudarFamilia: () => void }) {
+export function AppGuardiao({ sessao, aoMudarFamilia, aoSair }: { sessao: Sessao; aoMudarFamilia: () => void; aoSair: () => void }) {
   const { ajustes, mudar, restaurar } = useAjustes();
   const [tela, setTela] = useState<Tela>(telaDoEndereco);
   const [pendentes, setPendentes] = useState<AlertaDetalhe[]>([]);
@@ -81,8 +84,36 @@ export function AppGuardiao({ sessao, aoMudarFamilia }: { sessao: Sessao; aoMuda
   };
   const voltar = () => ir("");
 
+  /** Abre a tela da família e rola até uma seção dela. */
+  const irParaSecao = (id: string) => {
+    ir("");
+    window.setTimeout(() => document.getElementById(id)?.closest("section")?.scrollIntoView({ block: "start" }), 80);
+  };
+  const sair = () => {
+    const aviso = sessao.tem_conta
+      ? "Sair do Guardião neste aparelho?"
+      : "Você ainda não criou e-mail e senha. Se sair agora, só volta com um convite novo. Sair mesmo assim?";
+    if (window.confirm(aviso)) aoSair();
+  };
+  const membros = sessao.familia.membros;
+  const temProtegido = membros.some((m) => m.papel === "protegido");
+  const cabeGuardiao = membros.filter((m) => m.papel === "guardiao").length < 3;
+  const itens: ItemMenu[] = [
+    { id: "familia", rotulo: "Família", icone: <IconeCasa tamanho={22} />, atual: tela.nome === "familia", aoEscolher: () => { ir(""); window.scrollTo(0, 0); } },
+    { id: "alertas", rotulo: "Alertas", icone: <IconeSino tamanho={22} />, atual: tela.nome === "alerta", aoEscolher: () => irParaSecao("fam-historico") },
+    ...(!temProtegido || cabeGuardiao
+      ? [{ id: "convidar", rotulo: "Convidar", icone: <IconeConvidar tamanho={22} />, atual: tela.nome === "convite", aoEscolher: () => ir(temProtegido ? "convite-guardiao" : "convite-protegido") }]
+      : []),
+    { id: "senha", rotulo: "Palavra-senha", icone: <IconeChave tamanho={22} />, aoEscolher: () => irParaSecao("fam-senha") },
+    ...(temProtegido ? [{ id: "treino", rotulo: "Treino", icone: <Escudo largura={20} />, aoEscolher: () => irParaSecao("fam-treino") }] : []),
+    { id: "acessibilidade", rotulo: "Acessibilidade", icone: <IconeAcessibilidade tamanho={22} />, atual: tela.nome === "acessibilidade", aoEscolher: () => ir("acessibilidade") },
+    { id: "sair", rotulo: "Sair", icone: <IconeSair tamanho={22} />, aoEscolher: sair },
+  ];
+
   return (
     <>
+      {/* As molduras de demonstração do pitch ficam sem menu, para a tela caber como no roteiro. */}
+      {!PERFIL && <Menu itens={itens} largo={tela.nome === "familia" || tela.nome === "alerta"} />}
       {tela.nome === "familia" && (
         <Familia
           sessao={sessao}

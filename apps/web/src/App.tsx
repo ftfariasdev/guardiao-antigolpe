@@ -36,7 +36,7 @@ export function App() {
 function AppDaFamilia() {
   // Aplica os ajustes de acessibilidade salvos antes de qualquer tela.
   useAjustes();
-  const { estado, entrar, recarregar } = useSessao();
+  const { estado, entrar, sair, recarregar } = useSessao();
   const [convite] = useState(conviteDoEndereco);
 
   useEffect(() => {
@@ -67,5 +67,5 @@ function AppDaFamilia() {
       />
     );
   }
-  return estado.sessao.membro.papel === "protegido" ? <AppProtegido sessao={estado.sessao} /> : <AppGuardiao sessao={estado.sessao} aoMudarFamilia={recarregar} />;
+  return estado.sessao.membro.papel === "protegido" ? <AppProtegido sessao={estado.sessao} /> : <AppGuardiao sessao={estado.sessao} aoMudarFamilia={recarregar} aoSair={sair} />;
 }

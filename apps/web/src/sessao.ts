@@ -40,7 +40,7 @@ function adotarSessaoDaDemo() {
 
 type Estado = { fase: "carregando" } | { fase: "fora" } | { fase: "dentro"; sessao: Sessao } | { fase: "sem_rede" };
 
-/** Autenticação sem senha: o token da sessão fica só neste aparelho. */
+/** O token da sessão fica só neste aparelho. Ele vem de criar a família, aceitar um convite ou entrar com e-mail e senha. */
 export function useSessao() {
   const [estado, setEstado] = useState<Estado>(() => {
     adotarSessaoDaDemo();
@@ -71,7 +71,15 @@ export function useSessao() {
     setEstado({ fase: "dentro", sessao: criada });
   }, []);
 
-  return { estado, entrar, recarregar: carregar };
+  /** Apaga a sessão no servidor (se der) e neste aparelho. */
+  const sair = useCallback(async () => {
+    const token = lerToken();
+    if (token) await api.sair(token).catch(() => {});
+    guardarToken(null);
+    setEstado({ fase: "fora" });
+  }, []);
+
+  return { estado, entrar, sair, recarregar: carregar };
 }
 
 export type SocketFamilia = Socket<EventosFamilia, Record<string, never>>;

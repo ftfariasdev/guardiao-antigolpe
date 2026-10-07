@@ -31,7 +31,7 @@ export async function criarApp({ config, prisma, motor, notificador, pitch }: De
   });
 
   await app.register(helmet);
-  await app.register(cors, { origin: config.CORS_ORIGINS, methods: ["GET", "POST", "PUT", "PATCH"] });
+  await app.register(cors, { origin: config.CORS_ORIGINS, methods: ["GET", "POST", "PUT", "PATCH", "DELETE"] });
   // Limite global generoso: a plateia do pitch divide o mesmo IP do Wi-Fi.
   await app.register(rateLimit, { max: 600, timeWindow: "1 minute" });
 

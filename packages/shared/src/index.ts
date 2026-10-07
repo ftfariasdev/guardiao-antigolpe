@@ -143,10 +143,23 @@ export type SessaoCriada = z.infer<typeof SessaoCriada>;
 export const Email = z.string().trim().toLowerCase().email().max(120);
 export const Senha = z.string().min(8).max(100);
 
-/** E-mail e senha vêm juntos ou não vêm: sem eles a sessão vale só no aparelho que criou a família. */
-export const CriarFamilia = z
-  .object({ nome_familia: Nome, nome: Nome, parentesco: Parentesco.optional(), email: Email.optional(), senha: Senha.optional() })
-  .refine((d) => (d.email === undefined) === (d.senha === undefined), { message: "Informe e-mail e senha juntos." });
+/** A conta existe sozinha: a pessoa cria ou entra em uma família depois. */
+export const CriarConta = z.object({ nome: Nome, email: Email, senha: Senha });
+export type CriarConta = z.infer<typeof CriarConta>;
+
+/** Quem tem conta mas ainda não está em nenhuma família. */
+export const ContaSemFamilia = z.object({ sem_familia: z.literal(true), conta: z.object({ nome: z.string() }) });
+export type ContaSemFamilia = z.infer<typeof ContaSemFamilia>;
+
+/** `GET /sessao`: a família da pessoa, ou só a conta quando ela ainda não tem família. */
+export const SessaoAtual = z.union([DadosSessao, ContaSemFamilia]);
+export type SessaoAtual = z.infer<typeof SessaoAtual>;
+
+/** Resposta de criar a conta e de entrar: como `SessaoAtual`, com o token (só aqui, uma vez). */
+export const SessaoAberta = z.union([SessaoCriada, ContaSemFamilia.extend({ token: z.string().min(32) })]);
+export type SessaoAberta = z.infer<typeof SessaoAberta>;
+
+export const CriarFamilia = z.object({ nome_familia: Nome, nome: Nome, parentesco: Parentesco.optional() });
 export type CriarFamilia = z.infer<typeof CriarFamilia>;
 
 export const Entrar = z.object({ email: Email, senha: z.string().min(1).max(100) });

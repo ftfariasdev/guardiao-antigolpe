@@ -36,6 +36,8 @@ h1:focus { outline: none; } /* o título recebe o foco só para o leitor de tela
 .botao--secundario { border: var(--largura-borda) solid var(--cor-borda); background: var(--cor-superficie); color: var(--cor-texto); }
 .botao--secundario svg { color: var(--cor-marca); }
 .botao--fim { margin-top: auto; }
+.botao--compacto { width: auto; min-height: var(--alvo-toque); padding: 6px 18px; }
+.campo--curto { max-width: 24rem; }
 .botao-redondo { flex: none; display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: var(--raio-pilula); border: var(--largura-borda) solid transparent; background: var(--cor-superficie); color: var(--cor-marca); }
 [data-contraste="alto"] .botao-redondo { border-color: var(--cor-marca); }
 

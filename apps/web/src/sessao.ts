@@ -1,4 +1,4 @@
-import type { DadosSessao, EventosFamilia, SessaoCriada } from "@guardiao/shared";
+import type { DadosSessao, EventosFamilia, SessaoAberta, SessaoAtual } from "@guardiao/shared";
 import { useCallback, useEffect, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 import { api, BASE_API, ErroApi } from "./api";
@@ -38,7 +38,11 @@ function adotarSessaoDaDemo() {
   window.history.replaceState(null, "", window.location.pathname + window.location.search);
 }
 
-type Estado = { fase: "carregando" } | { fase: "fora" } | { fase: "dentro"; sessao: Sessao } | { fase: "sem_rede" };
+/** "sem_familia": a pessoa fez login, mas ainda não criou nem entrou em uma família. */
+type Estado = { fase: "carregando" } | { fase: "fora" } | { fase: "sem_familia"; token: string; nome: string } | { fase: "dentro"; sessao: Sessao } | { fase: "sem_rede" };
+
+const estadoDe = (token: string, dados: SessaoAtual): Estado =>
+  "sem_familia" in dados ? { fase: "sem_familia", token, nome: dados.conta.nome } : { fase: "dentro", sessao: { ...dados, token } };
 
 /** O token da sessão fica só neste aparelho. Ele vem de criar a família, aceitar um convite ou entrar com e-mail e senha. */
 export function useSessao() {
@@ -51,7 +55,7 @@ export function useSessao() {
     const token = lerToken();
     if (!token) return setEstado({ fase: "fora" });
     try {
-      setEstado({ fase: "dentro", sessao: { token, ...(await api.sessao(token)) } });
+      setEstado(estadoDe(token, await api.sessao(token)));
     } catch (erro) {
       if (erro instanceof ErroApi && erro.status === 401) {
         guardarToken(null);
@@ -66,9 +70,9 @@ export function useSessao() {
     void carregar();
   }, [carregar]);
 
-  const entrar = useCallback((criada: SessaoCriada) => {
-    guardarToken(criada.token);
-    setEstado({ fase: "dentro", sessao: criada });
+  const entrar = useCallback((aberta: SessaoAberta) => {
+    guardarToken(aberta.token);
+    setEstado(estadoDe(aberta.token, aberta));
   }, []);
 
   /** Apaga a sessão no servidor (se der) e neste aparelho. */

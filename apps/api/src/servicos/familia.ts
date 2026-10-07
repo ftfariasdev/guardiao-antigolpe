@@ -23,7 +23,8 @@ export async function resumoDaFamilia(prisma: PrismaClient, familiaId: string): 
 }
 
 export async function dadosDaSessao(prisma: PrismaClient, membro: Membro): Promise<DadosSessao> {
-  return { membro: resumoDoMembro(membro), familia: await resumoDaFamilia(prisma, membro.familiaId), tem_conta: membro.senhaHash !== null };
+  const contas = await prisma.conta.count({ where: { membroId: membro.id } });
+  return { membro: resumoDoMembro(membro), familia: await resumoDaFamilia(prisma, membro.familiaId), tem_conta: contas > 0 };
 }
 
 /** Guardiões na ordem em que são acionados. */

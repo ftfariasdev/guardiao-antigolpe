@@ -93,9 +93,6 @@ model Membro {
   nome             String
   parentesco       String?
   papel            Papel
-  /// login do guardião: e-mail em minúsculas e senha com argon2id (nunca lida de volta)
-  email            String?   @unique
-  senhaHash        String?   @map("senha_hash")
   /// ordem de acionamento dos guardiões (1 = primeiro)
   ordem            Int       @default(1)
   pushSubscription Json?     @map("push_subscription")
@@ -104,6 +101,7 @@ model Membro {
   criadoEm         DateTime  @default(now()) @map("criado_em")
   familia          Familia   @relation(fields: [familiaId], references: [id], onDelete: Cascade)
   sessoes          Sessao[]
+  conta            Conta?
   analises         Analise[]
   alertas          Alerta[]
   treinosEnviados  Treino[]
@@ -112,14 +110,34 @@ model Membro {
   @@map("membros")
 }
 
+/// Login com e-mail e senha. A conta pode existir antes de a pessoa criar ou entrar em uma família.
+model Conta {
+  id        String   @id @default(uuid()) @db.Uuid
+  nome      String
+  /// sempre em minúsculas
+  email     String   @unique
+  /// argon2id; nunca lida de volta
+  senhaHash String   @map("senha_hash")
+  /// vazio enquanto a pessoa não está em nenhuma família
+  membroId  String?  @unique @map("membro_id") @db.Uuid
+  criadoEm  DateTime @default(now()) @map("criado_em")
+  membro    Membro?  @relation(fields: [membroId], references: [id], onDelete: SetNull)
+  sessoes   Sessao[]
+
+  @@map("contas")
+}
+
+/// Sessão de um aparelho: de um membro (convite, sem senha) ou de uma conta (login).
 model Sessao {
   id           String   @id @default(uuid()) @db.Uuid
-  membroId     String   @map("membro_id") @db.Uuid
+  membroId     String?  @map("membro_id") @db.Uuid
+  contaId      String?  @map("conta_id") @db.Uuid
   /// SHA-256 do token de 32 bytes guardado no aparelho
   tokenHash    String   @unique @map("token_hash")
   ultimoAcesso DateTime @default(now()) @map("ultimo_acesso")
   criadoEm     DateTime @default(now()) @map("criado_em")
-  membro       Membro   @relation(fields: [membroId], references: [id], onDelete: Cascade)
+  membro       Membro?  @relation(fields: [membroId], references: [id], onDelete: Cascade)
+  conta        Conta?   @relation(fields: [contaId], references: [id], onDelete: Cascade)
 
   @@map("sessoes")
 }

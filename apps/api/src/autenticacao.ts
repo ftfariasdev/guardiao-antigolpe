@@ -1,4 +1,4 @@
-import type { Membro, PrismaClient } from "@prisma/client";
+import type { Conta, Membro, PrismaClient } from "@prisma/client";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { hashToken } from "./seguranca.js";
 
@@ -19,22 +19,35 @@ export class ErroHttp extends Error {
   }
 }
 
-export async function membroDoToken(prisma: PrismaClient, token: string): Promise<Membro | null> {
-  const sessao = await prisma.sessao.findUnique({ where: { tokenHash: hashToken(token) }, include: { membro: true } });
-  if (!sessao) return null;
+export function tokenDoPedido(req: FastifyRequest): string {
+  const cabecalho = req.headers.authorization ?? "";
+  return cabecalho.startsWith("Bearer ") ? cabecalho.slice(7).trim() : "";
+}
+
+/**
+ * De quem é a sessão. A de convite aponta para o membro; a de login aponta para a conta,
+ * e o membro é o da conta naquele momento (vazio enquanto ela não tem família).
+ */
+export async function donoDoToken(prisma: PrismaClient, token: string): Promise<{ membro: Membro | null; conta: Conta | null } | null> {
+  const sessao = await prisma.sessao.findUnique({ where: { tokenHash: hashToken(token) }, include: { membro: true, conta: { include: { membro: true } } } });
+  if (!sessao || (!sessao.membro && !sessao.conta)) return null;
   // Atualiza o último acesso sem segurar a resposta.
   void prisma.sessao.update({ where: { id: sessao.id }, data: { ultimoAcesso: new Date() } }).catch(() => {});
-  return sessao.membro;
+  return { membro: sessao.membro ?? sessao.conta?.membro ?? null, conta: sessao.conta };
+}
+
+export async function membroDoToken(prisma: PrismaClient, token: string): Promise<Membro | null> {
+  return (await donoDoToken(prisma, token))?.membro ?? null;
 }
 
 /** preHandler: exige `Authorization: Bearer <token da sessão>`. */
 export function exigirSessao(prisma: PrismaClient) {
   return async (req: FastifyRequest, _res: FastifyReply) => {
-    const cabecalho = req.headers.authorization ?? "";
-    const token = cabecalho.startsWith("Bearer ") ? cabecalho.slice(7).trim() : "";
-    const membro = token ? await membroDoToken(prisma, token) : null;
-    if (!membro) throw new ErroHttp(401, "sessao_invalida", "Entre de novo pelo convite da família.");
-    req.membro = membro;
+    const token = tokenDoPedido(req);
+    const dono = token ? await donoDoToken(prisma, token) : null;
+    if (!dono) throw new ErroHttp(401, "sessao_invalida", "Entre de novo com a sua conta ou pelo convite da família.");
+    if (!dono.membro) throw new ErroHttp(403, "sem_familia", "Crie uma família ou entre em uma para continuar.");
+    req.membro = dono.membro;
   };
 }
 

@@ -12,7 +12,7 @@ export const prisma = new PrismaClient({ datasources: { db: { url: URL_BANCO_TES
 export const config = lerConfig({ NODE_ENV: "test", DATABASE_URL: URL_BANCO_TESTE, ADMIN_TOKEN: "segredo-do-palco" });
 
 export async function limparBanco() {
-  await prisma.$executeRawUnsafe('TRUNCATE "familias", "pitch_sessoes" CASCADE');
+  await prisma.$executeRawUnsafe('TRUNCATE "familias", "contas", "pitch_sessoes" CASCADE');
 }
 
 /** Notificador que só anota o que seria enviado. */

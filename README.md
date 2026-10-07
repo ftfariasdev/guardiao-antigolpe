@@ -32,7 +32,7 @@ O Guardião Antigolpe é um PWA que analisa mensagens suspeitas e avisa um famil
 
 Além da análise, o app tem palavra-senha da família, convite por QR, treino com golpes simulados e o fluxo "Já paguei".
 
-O guardião cria uma conta com e-mail e senha e entra em qualquer aparelho. A pessoa protegida entra só pelo convite, sem senha.
+Quem cuida cria uma conta com e-mail e senha e entra em qualquer aparelho. A conta não exige família: depois de criá-la, a pessoa cria uma família ou entra em uma por convite. A pessoa protegida entra só pelo convite, sem senha.
 
 ### Garantias do projeto
 

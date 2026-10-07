@@ -3,7 +3,9 @@ import { useAjustes } from "./ajustes";
 import { api } from "./api";
 import { registrarServiceWorker } from "./push";
 import { useSessao } from "./sessao";
+import type { SessaoAberta } from "@guardiao/shared";
 import { Entrada } from "./telas/Entrada";
+import { SemFamilia } from "./telas/SemFamilia";
 import { Simulador } from "./telas/pitch/Simulador";
 import { AppGuardiao } from "./telas/guardiao/AppGuardiao";
 import { AppProtegido } from "./telas/protegido/AppProtegido";
@@ -37,7 +39,7 @@ function AppDaFamilia() {
   // Aplica os ajustes de acessibilidade salvos antes de qualquer tela.
   useAjustes();
   const { estado, entrar, sair, recarregar } = useSessao();
-  const [convite] = useState(conviteDoEndereco);
+  const [convite, setConvite] = useState(conviteDoEndereco);
 
   useEffect(() => {
     void registrarServiceWorker();
@@ -55,17 +57,16 @@ function AppDaFamilia() {
       </main>
     );
   }
-  if (estado.fase === "fora") {
-    return (
-      <Entrada
-        convite={convite}
-        aoEntrar={(sessao) => {
-          // Tira o token do convite do endereço antes de mostrar o app.
-          window.history.replaceState(null, "", window.location.pathname);
-          entrar(sessao);
-        }}
-      />
-    );
-  }
+  const entrarNoApp = (sessao: SessaoAberta) => {
+    // Já dentro de uma família, o token do convite sai do endereço antes de o app aparecer.
+    if (!("sem_familia" in sessao)) {
+      window.history.replaceState(null, "", window.location.pathname);
+      // O convite vale uma vez: depois de usado, não volta a aparecer se a pessoa sair.
+      setConvite(null);
+    }
+    entrar(sessao);
+  };
+  if (estado.fase === "fora") return <Entrada convite={convite} aoEntrar={entrarNoApp} />;
+  if (estado.fase === "sem_familia") return <SemFamilia token={estado.token} nome={estado.nome} convite={convite} aoEntrar={entrarNoApp} aoSair={sair} />;
   return estado.sessao.membro.papel === "protegido" ? <AppProtegido sessao={estado.sessao} /> : <AppGuardiao sessao={estado.sessao} aoMudarFamilia={recarregar} aoSair={sair} />;
 }

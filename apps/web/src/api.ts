@@ -5,10 +5,13 @@ import {
   ItemHistorico,
   ModeloTreino,
   ResultadoAnalise,
+  SessaoAberta,
+  SessaoAtual,
   SessaoCriada,
   SessaoPitch,
   TreinoDetalhe,
   type AceitarConvite,
+  type CriarConta,
   type CriarFamilia,
   type DefinirConta,
   type Entrar,
@@ -53,10 +56,12 @@ async function pedir<T>(metodo: string, caminho: string, esquema: z.ZodType<T, z
 }
 
 export const api = {
-  criarFamilia: (dados: CriarFamilia) => pedir("POST", "/familias", SessaoCriada, { corpo: dados }),
-  aceitarConvite: (convite: string, dados: AceitarConvite) => pedir("POST", `/convites/${encodeURIComponent(convite)}/aceitar`, SessaoCriada, { corpo: dados }),
-  sessao: (token: string) => pedir("GET", "/sessao", DadosSessao, { token }),
-  entrar: (dados: Entrar) => pedir("POST", "/sessoes", SessaoCriada, { corpo: dados }),
+  criarConta: (dados: CriarConta) => pedir("POST", "/contas", SessaoAberta, { corpo: dados }),
+  /** Com `token` (quem já fez login), a família ou o convite ficam ligados à conta. */
+  criarFamilia: (dados: CriarFamilia, token?: string) => pedir("POST", "/familias", SessaoCriada, { corpo: dados, token }),
+  aceitarConvite: (convite: string, dados: AceitarConvite, token?: string) => pedir("POST", `/convites/${encodeURIComponent(convite)}/aceitar`, SessaoCriada, { corpo: dados, token }),
+  sessao: (token: string) => pedir("GET", "/sessao", SessaoAtual, { token }),
+  entrar: (dados: Entrar) => pedir("POST", "/sessoes", SessaoAberta, { corpo: dados }),
   sair: (token: string) => pedir("DELETE", "/sessao", null, { token }),
   definirConta: (token: string, dados: DefinirConta) => pedir("PUT", "/conta", DadosSessao, { token, corpo: dados }),
   criarConvite: (token: string, familiaId: string, papel: Papel) => pedir("POST", `/familias/${familiaId}/convites`, ConviteCriado, { token, corpo: { papel } }),

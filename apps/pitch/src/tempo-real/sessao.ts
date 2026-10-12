@@ -46,7 +46,10 @@ export function usePitch(ativo: boolean) {
         let id = localStorage.getItem(CHAVE);
         let sessao: SessaoPitch | null;
         if (ADMIN_TOKEN) {
-          sessao = (id ? await buscar(id) : null) ?? (await admin("/pitch/sessoes"));
+          // O link curto "/#pitch" leva à sessão mais recente. Se a guardada aqui não for mais ela
+          // (teste de carga, ensaio em outro navegador), abre uma nova, que passa a ser a mais recente.
+          const atual = id ? await buscar("atual") : null;
+          sessao = (id && atual?.id === id ? atual : null) ?? (await admin("/pitch/sessoes"));
         } else {
           // Sem o token (pitch publicado) não dá para criar sessão: acompanha a que estiver aberta,
           // a mesma do link curto "/#pitch". Revelar e zerar continuam só com o token.

@@ -3,6 +3,7 @@ import { useEffect, useId, useState, type FormEvent } from "react";
 import { api, ErroApi } from "../../api";
 import { Escudo, IconeAcessibilidade, IconeChave, IconeConvidar, IconeSino } from "../../componentes/Icones";
 import { ativarAvisos, avisosAtivos, temPush } from "../../push";
+import { PERFIL } from "../../perfil";
 import type { Sessao } from "../../sessao";
 
 interface Props {
@@ -184,12 +185,12 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
             <li className="membro">
               <span className="membro__inicial membro__inicial--protegido" aria-hidden="true">{protegido.nome[0]?.toUpperCase()}</span>
               <span><strong>{protegido.nome}</strong><br /><span className="apoio">Pessoa protegida</span></span>
-              <span className="membro__acoes">
+              {!PERFIL && <span className="membro__acoes">
                 {guardioes.length < 3 && (
                   <button type="button" className="botao botao--secundario botao--compacto" onClick={() => mudarPapel(protegido, "guardiao")}>Tornar guardião</button>
                 )}
                 <button type="button" className="botao botao--secundario botao--compacto" aria-label={`Remover ${protegido.nome} da família`} onClick={() => remover(protegido)}>Remover</button>
-              </span>
+              </span>}
             </li>
           )}
           {guardioes.map((g, i) => (
@@ -199,7 +200,7 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
                 <strong>{g.nome}{g.id === membro.id ? " (você)" : ""}</strong><br />
                 <span className="apoio">{g.parentesco ? `${g.parentesco[0]?.toUpperCase()}${g.parentesco.slice(1)}, ` : ""}{ORDINAL[i]} pessoa a ser avisada</span>
               </span>
-              {guardioes.length > 1 && (
+              {!PERFIL && guardioes.length > 1 && (
                 <span className="membro__acoes">
                   {i > 0 && (
                     <button type="button" className="botao botao--secundario botao--compacto" aria-label={`Avisar ${g.nome} antes de ${guardioes[i - 1]?.nome}`} onClick={() => avisarAntes(g, i)}>Avisar antes</button>
@@ -213,7 +214,8 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
             </li>
           ))}
         </ul>
-        <p className="apoio">
+        {/* Na moldura de demonstração do pitch (?perfil=) a gestão da família e a conta ficam de fora. */}
+        {!PERFIL && <p className="apoio">
           {protegido
             ? guardioes.length < 3
               ? "Para trocar quem é a pessoa protegida, torne-a guardiã e depois escolha outra pessoa."
@@ -221,7 +223,7 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
             : guardioes.length > 1
               ? "Escolha quem é a pessoa protegida, ou convide alguém."
               : "Convide a pessoa que você quer proteger."}
-        </p>
+        </p>}
         {!protegido && (
           <button type="button" className="botao botao--principal" onClick={() => aoConvidar("protegido")}><IconeConvidar tamanho={22} />Convidar a pessoa protegida</button>
         )}
@@ -230,7 +232,7 @@ export function Familia({ sessao, pendentes, historico, aoConvidar, aoAbrirAlert
         )}
       </section>
 
-      {!sessao.tem_conta && (
+      {!PERFIL && !sessao.tem_conta && (
         <section className="cartao cartao--destaque" aria-labelledby="fam-conta">
           <h2 id="fam-conta" className="subtitulo">Crie seu e-mail e senha</h2>
           <p className="apoio">Hoje você só entra por este aparelho. Com e-mail e senha você entra em qualquer um.</p>

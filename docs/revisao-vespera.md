@@ -42,6 +42,7 @@ As capturas estão em `.playwright-mcp/vespera/` (pasta local, fora do git).
 | --- | --- | --- |
 | `8798fa8` | P1 | A moldura da Ana no slide 7 mostrava "Remover", "Tornar guardião" e o cartão "Crie seu e-mail e senha". Na moldura de demonstração (`?perfil=`) isso não aparece mais. |
 | `1d616b7` | P0 | O painel seguia numa sessão antiga depois de um teste de carga ou ensaio em outro navegador: placar em zero e revelação sem chegar em quem entrou pelo link digitado. Agora o painel abre uma sessão nova quando a guardada não é mais a do link curto. |
+| (este commit) | P1 | Slides 4 e 5 ganharam a fonte com link, e as notas do apresentador também. Os dois números foram conferidos: 24 milhões (Fórum Brasileiro de Segurança Pública e Datafolha, jul/2024 a jun/2025) e 9,3% (Banco Central, apresentação do MED 2.0). |
 
 ## 4. Pendências
 
@@ -54,7 +55,6 @@ As capturas estão em `.playwright-mcp/vespera/` (pasta local, fora do git).
 | P1 | Sem vídeo de backup. | Corrigir: gravar hoje, depois de ligar o `DEMO_MODE`. |
 | P1 | Slide 8 diz "Texto, print, áudio, link, Pix copia e cola ou QR Code", mas print e áudio não existem no app. | Corrigir o texto ou saber responder; é texto de slide, então aguardo sua decisão. |
 | P1 | Compartilhar do Android para o app instalado cai em página 404 (`/compartilhar` não existe). | Esconder: tirar o `share_target` do manifesto. Não fiz porque mexe no que o celular instalado registra; a demo usa a conversa simulada. |
-| P1 | "24 milhões" e "9,3% do MED" não têm fonte nas notas do apresentador. | Corrigir: anotar a fonte; não consegui confirmar os números. |
 | P2 | Limites de login e cadastro (5 por minuto) são compartilhados entre todos, porque a API vê o IP do proxy. | Aceitar para amanhã; não ligar `trustProxy` agora. |
 | P2 | O token do convite aparece na URL registrada no log da API. | Corrigir depois do pitch. |
 | P2 | Recarregar a tela de convite depois de o convite ser usado mostra "Esta família já tem uma pessoa protegida". | Aceitar. |
@@ -85,7 +85,6 @@ Todas foram feitas em 06/10 e nenhuma faz parte do roteiro.
 - Ensaio cronometrado, duas vezes, com o passador.
 - Pendrive com o PDF dos slides e o vídeo de backup.
 - Web Push no seu celular, se for mostrar.
-- Fonte dos números dos slides 4 e 5.
 
 ## 7. Amanhã
 

@@ -26,6 +26,8 @@ h1 { font-family: var(--fonte-titulo); font-weight: 600; font-size: 96px; line-h
 .frase { font-size: 48px; max-width: 1400px; }
 .gigante { font-family: var(--fonte-titulo); font-weight: 700; font-size: 280px; line-height: 1; }
 .numero { font-variant-numeric: tabular-nums; }
+.fonte { font-size: 24px; color: var(--cor-texto-secundario); }
+.fonte a { color: inherit; text-decoration: underline; text-underline-offset: 4px; }
 .legenda { position: absolute; left: 110px; right: 110px; bottom: 130px; text-align: center; font-size: 34px; color: var(--cor-texto-secundario); }
 
 .rodape { display: flex; align-items: center; justify-content: space-between; padding: 0 110px 48px; height: 120px; color: var(--cor-texto-secundario); font-size: 28px; }

@@ -111,11 +111,16 @@ function Revelacao({ pitch, leve, estatico }: PropsSlide) {
   );
 }
 
+/** Fontes dos números dos slides 4 e 5, conferidas em 12/10/2026. */
+const FONTE_24_MILHOES = "https://www12.senado.leg.br/radio/1/noticia/2025/08/18/mais-de-24-milhoes-de-pessoas-foram-vitimas-de-golpes-pelo-pix";
+const FONTE_MED = "https://www.bcb.gov.br/content/estabilidadefinanceira/pix/MED/MED_2-0_Circuito_Pix-Dia_1.pdf";
+
 function VinteQuatroMilhoes() {
   return (
     <div className="slide slide--centro">
       <p className="gigante"><NumeroGrande valor={24} /> milhões</p>
       <p className="frase">de brasileiros caíram em golpe de Pix ou boleto em um ano</p>
+      <p className="fonte">Fonte: <a href={FONTE_24_MILHOES} target="_blank" rel="noreferrer">Fórum Brasileiro de Segurança Pública e Datafolha, jul/2024 a jun/2025 (Rádio Senado)</a></p>
     </div>
   );
 }
@@ -126,6 +131,7 @@ function Med({ estatico }: PropsSlide) {
       <p className="gigante acento"><NumeroGrande valor={9.3} formatar={(n) => `${n.toFixed(1).replace(".", ",")}%`} /></p>
       <div className={estatico ? "barra barra--med barra--pronta" : "barra barra--med"} role="img" aria-label="Barra quase vazia: 9,3%"><span /></div>
       <p className="frase">do dinheiro contestado no MED em 2025 voltou</p>
+      <p className="fonte">Fonte: <a href={FONTE_MED} target="_blank" rel="noreferrer">Banco Central do Brasil, apresentação do MED 2.0</a></p>
     </div>
   );
 }

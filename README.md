@@ -112,7 +112,7 @@ pnpm --filter @guardiao/pitch dev                  # http://localhost:5174
 | `R` | Revela a simulação em todos os celulares |
 | `Z` duas vezes | Zera os contadores |
 | `P` | Abre a janela do apresentador (fala, cronômetro, placar, conexão) |
-| `D` | Prepara as contas de demonstração do slide 7 |
+| `D` | Prepara as contas de demonstração do slide 6 |
 | `V` | Troca a demo ao vivo pelo vídeo de backup (`apps/pitch/public/video/demo.mp4`) |
 | `B` / `F` / `L` | Tela preta / tela cheia / modo leve |
 
@@ -120,13 +120,13 @@ pnpm --filter @guardiao/pitch dev                  # http://localhost:5174
 
 - **Plateia:** entra pelo QR do slide 1 ou digitando `<endereço do app>/#pitch`.
 - **Demo sem LLM:** com `DEMO_MODE=true` na API, as duas mensagens do roteiro respondem pelo cache.
-- **Cenas 3D:** os slides 3, 6 e 10 têm o escudo em 3D. `L` troca pelo escudo 2D; sem WebGL isso acontece sozinho.
-- **Atalhos de URL:** `?slide=7` abre direto num slide; `?slide=3&quadro=0.5` congela a cena 3D num ponto da animação.
+- **Cenas 3D:** os slides 2, 5 e 9 têm o escudo em 3D. `L` troca pelo escudo 2D; sem WebGL isso acontece sozinho.
+- **Atalhos de URL:** `?slide=6` abre direto num slide; `?slide=2&quadro=0.5` congela a cena 3D num ponto da animação.
 - **CORS:** a origem do pitch precisa estar em `CORS_ORIGINS` da API que ele usa.
 
 ### PDF dos slides
 
-`http://localhost:5174/?imprimir` mostra os 10 slides em sequência para "Imprimir como PDF". Pelo terminal, com o pitch rodando:
+`http://localhost:5174/?imprimir` mostra os 9 slides em sequência para "Imprimir como PDF". Pelo terminal, com o pitch rodando:
 
 ```bash
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --no-pdf-header-footer --print-to-pdf=apps/pitch/pdf/guardiao-pitch.pdf "http://localhost:5174/?imprimir"

@@ -115,11 +115,11 @@ Abra `http://localhost:5174` no Chrome. O app e a API são os de produção; nã
 
 1. `https://api-production-c752.up.railway.app/api/v1/saude` responde `ok`.
 2. Slide 1: o texto "Ou digite" mostra `guardiao-antigolpe.vercel.app/#pitch`, não `localhost`.
-3. Ler o QR com o seu celular e tocar em Confirmar: o slide 2 conta 1.
+3. Ler o QR com o seu celular e tocar em Confirmar: a janela do apresentador (`P`) conta 1.
 4. `R` revela no seu celular. Depois `Z Z` e conferir que o placar voltou a zero.
-5. Slide 7: `D` prepara as contas; as duas molduras abrem.
+5. Slide 6: `D` prepara as contas; as duas molduras abrem.
 6. Rodar a demo uma vez até o Pix. Depois `D` de novo para começar limpo.
 7. `P` abre a janela do apresentador; reiniciar o cronômetro.
-8. `V` no slide 7 toca o vídeo; `V` de novo volta.
+8. `V` no slide 6 toca o vídeo; `V` de novo volta.
 9. `F` para tela cheia; `L` se as cenas 3D engasgarem no projetor.
 10. Voltar ao slide 1, notebook na tomada, notificações desligadas.

@@ -1,7 +1,7 @@
 /**
  * Roteiro da demo do pitch (doc "Apresentação programada e roteiro da demo").
  * As mesmas mensagens aparecem na conversa simulada do app, no cache do DEMO_MODE da API
- * e no slide 7. Tudo é fictício: nomes, valores e CNPJ.
+ * e no slide 6. Tudo é fictício: nomes, valores e CNPJ.
  */
 
 /** Passo 1: a mensagem de falso parente que chega para a Dona Cida. */

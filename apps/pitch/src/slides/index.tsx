@@ -5,7 +5,7 @@ import { medicao } from "../medicao";
 import type { ContasDemo } from "../tempo-real/demo";
 import type { EstadoPitch } from "../tempo-real/sessao";
 
-// As cenas 3D carregam à parte: o three.js só entra nos slides 3, 6 e 10, e o canvas é
+// As cenas 3D carregam à parte: o three.js só entra nos slides 2, 5 e 9, e o canvas é
 // descarregado nos outros para liberar a placa de vídeo.
 const CenaEscudo = lazy(() => import("../cenas/CenaEscudo"));
 const semMovimento = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -79,31 +79,11 @@ function Brinde({ pitch }: PropsSlide) {
   );
 }
 
-/** 2. Painel ao vivo. */
-function Painel({ pitch }: PropsSlide) {
-  const desconfiaram = Math.max(0, pitch.acessaram - pitch.confirmaram);
-  const porcento = pitch.acessaram ? Math.round((pitch.confirmaram / pitch.acessaram) * 100) : 0;
-  return (
-    <div className="slide slide--painel">
-      <div className="coluna">
-        <p className="ao-vivo"><span />Ao vivo</p>
-        <h1>Quantas pessoas caíram?</h1>
-        <div className="placar">
-          <p><NumeroGrande valor={pitch.confirmaram} className="acento" /><span>tocaram em Confirmar</span></p>
-          <p><NumeroGrande valor={desconfiaram} /><span>desconfiaram e não tocaram</span></p>
-        </div>
-        <div className="barra" role="img" aria-label={`${porcento}% de quem abriu tocou em Confirmar`}><span style={{ width: `${porcento}%` }} /></div>
-        <p className="apoio">{porcento}% de quem abriu a página tocou em Confirmar</p>
-      </div>
-      <div className="cartao-qr"><Qr url={linkDoSimulador(pitch.sessao)} rotulo="QR Code da sessão" /><p>Escaneie e participe</p></div>
-    </div>
-  );
-}
-
-/** 3. Revelação, com a cena 3D 1: o escudo se forma. */
+/** 2. Revelação, ao vivo, com a cena 3D 1: o escudo se forma. */
 function Revelacao({ pitch, leve, estatico }: PropsSlide) {
   return (
     <div className="slide slide--centro slide--cena">
+      <p className="ao-vivo"><span />Ao vivo</p>
       <Cena modo="formando" leve={leve} estatico={estatico} largura2d={220} />
       <h1>Isso foi apenas uma <span className="acento">simulação</span>.</h1>
       <p className="frase"><NumeroGrande valor={pitch.confirmaram} className="numero--linha acento" /> de vocês tocaram em Confirmar em menos de um minuto.</p>
@@ -111,7 +91,7 @@ function Revelacao({ pitch, leve, estatico }: PropsSlide) {
   );
 }
 
-/** Fontes dos números dos slides 4 e 5, conferidas em 12/10/2026. */
+/** Fontes dos números dos slides 3 e 4, conferidas em 12/10/2026. */
 const FONTE_24_MILHOES = "https://www12.senado.leg.br/radio/1/noticia/2025/08/18/mais-de-24-milhoes-de-pessoas-foram-vitimas-de-golpes-pelo-pix";
 const FONTE_MED = "https://www.bcb.gov.br/content/estabilidadefinanceira/pix/MED/MED_2-0_Circuito_Pix-Dia_1.pdf";
 
@@ -243,7 +223,6 @@ function Fechamento({ leve, estatico }: PropsSlide) {
 
 export const SLIDES: Record<string, (props: PropsSlide) => ReactNode> = {
   brinde: Brinde,
-  painel: Painel,
   revelacao: Revelacao,
   "24-milhoes": VinteQuatroMilhoes,
   med: Med,

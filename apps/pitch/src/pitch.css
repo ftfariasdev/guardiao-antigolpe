@@ -35,6 +35,8 @@ h1 { font-family: var(--fonte-titulo); font-weight: 600; font-size: 96px; line-h
 
 /* Painel ao vivo */
 .ao-vivo { align-self: flex-start; display: flex; align-items: center; gap: 12px; padding: 10px 24px; border-radius: 999px; background: var(--cor-superficie); font-weight: 700; font-size: 28px; }
+/* Na revelação a etiqueta fica fora do fluxo, para não empurrar a frase para cima da legenda. */
+.slide--centro .ao-vivo { position: absolute; top: 48px; left: 50%; transform: translateX(-50%); z-index: 1; }
 .ao-vivo span { width: 16px; height: 16px; border-radius: 50%; background: var(--cor-acento); }
 .placar { display: flex; gap: 96px; }
 .placar p { display: flex; flex-direction: column; gap: 6px; color: var(--cor-texto-secundario); font-size: 34px; }

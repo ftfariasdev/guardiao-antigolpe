@@ -29,7 +29,7 @@ async function criarContas(): Promise<ContasDemo> {
   return { ana: ana.token, cida: cida.token };
 }
 
-/** Contas da demo do slide 7 e o aviso de quando o alerta chega para a Ana. */
+/** Contas da demo do slide 6 e o aviso de quando o alerta chega para a Ana. */
 export function useDemo(ativo: boolean, aoChegarAlerta: () => void) {
   const [contas, setContas] = useState<ContasDemo | null>(() => {
     try {

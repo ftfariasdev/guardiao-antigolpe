@@ -1,6 +1,6 @@
 /**
  * Perfil de demonstração. Com `?perfil=cida` ou `?perfil=ana` no endereço, o app guarda a sessão
- * e os ajustes numa gaveta separada. É o que deixa o slide 7 do pitch mostrar a Dona Cida e a Ana
+ * e os ajustes numa gaveta separada. É o que deixa o slide 6 do pitch mostrar a Dona Cida e a Ana
  * lado a lado no mesmo navegador. Sem o parâmetro, nada muda.
  */
 const bruto = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("perfil");

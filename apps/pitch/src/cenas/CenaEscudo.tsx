@@ -8,9 +8,9 @@ import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
  * As três cenas 3D do pitch usam o mesmo objeto: o escudo do logo, extrudado a partir da
  * geometria de packages/brand. Assim o 3D reforça a marca em vez de competir com ela.
  *
- *   formando  (slide 3)   partículas ciano se juntam no contorno e o volume aparece — 2,5 s
- *   vivo      (slide 6)   o escudo gira devagar, com parallax do mouse, e os pontos pulsam — em loop
- *   fechando  (slide 10)  o escudo avança até ocupar a tela e brilha uma vez — 2 s
+ *   formando  (slide 2)   partículas ciano se juntam no contorno e o volume aparece — 2,5 s
+ *   vivo      (slide 5)   o escudo gira devagar, com parallax do mouse, e os pontos pulsam — em loop
+ *   fechando  (slide 9)  o escudo avança até ocupar a tela e brilha uma vez — 2 s
  */
 export type ModoCena = "formando" | "vivo" | "fechando";
 

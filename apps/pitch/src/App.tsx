@@ -47,7 +47,7 @@ function tocarAlerta() {
 
 function Palco() {
   const escala = useEscala();
-  // `?slide=7` abre direto num slide: útil para ensaiar um trecho.
+  // `?slide=6` abre direto num slide: útil para ensaiar um trecho.
   const [indice, setIndice] = useState(() => Math.min(roteiro.length, Math.max(1, Number(parametros.get("slide")) || 1)) - 1);
   const [passo, setPasso] = useState(0);
   const [inicio, setInicio] = useState<number | null>(null);

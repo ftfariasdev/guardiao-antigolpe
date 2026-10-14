@@ -10,7 +10,7 @@ import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
  *
  *   formando  (slide 3)   partículas ciano se juntam no contorno e o volume aparece — 2,5 s
  *   vivo      (slide 6)   o escudo gira devagar, com parallax do mouse, e os pontos pulsam — em loop
- *   fechando  (slide 11)  o escudo avança até ocupar a tela e brilha uma vez — 2 s
+ *   fechando  (slide 10)  o escudo avança até ocupar a tela e brilha uma vez — 2 s
  */
 export type ModoCena = "formando" | "vivo" | "fechando";
 

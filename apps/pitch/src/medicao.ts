@@ -1,5 +1,5 @@
 /**
- * Números do slide 10, copiados do resumo de `pnpm avaliar`.
+ * Números do slide 9, copiados do resumo de `pnpm avaliar`.
  *
  * Hoje valem os da medição só com as regras (`pnpm avaliar --so-regras`). Nesse modo toda análise
  * sai no mínimo amarela, então "detectados" não diz nada: o número que vale é o de golpes em vermelho.

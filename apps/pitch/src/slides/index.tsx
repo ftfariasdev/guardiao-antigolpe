@@ -5,7 +5,7 @@ import { medicao } from "../medicao";
 import type { ContasDemo } from "../tempo-real/demo";
 import type { EstadoPitch } from "../tempo-real/sessao";
 
-// As cenas 3D carregam à parte: o three.js só entra nos slides 3, 6 e 11, e o canvas é
+// As cenas 3D carregam à parte: o three.js só entra nos slides 3, 6 e 10, e o canvas é
 // descarregado nos outros para liberar a placa de vídeo.
 const CenaEscudo = lazy(() => import("../cenas/CenaEscudo"));
 const semMovimento = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -180,26 +180,6 @@ function Demo({ demo, estatico }: PropsSlide) {
   );
 }
 
-const CAMADAS = [
-  { nome: "Entrada", texto: "Texto, print, áudio, link, Pix copia e cola ou QR Code" },
-  { nome: "Regras + IA", texto: "Rodam ao mesmo tempo, cada uma com o trecho que justifica o sinal" },
-  { nome: "Fusão", texto: "Vale o maior risco. Se a IA falhar, a resposta nunca é “pode pagar”" },
-  { nome: "Resultado", texto: "Semáforo em linguagem simples, e a família avisada antes do Pix" },
-];
-
-function Motor({ passo, estatico }: PropsSlide) {
-  return (
-    <div className="slide slide--lista">
-      <h1>Como funciona</h1>
-      <ol className="camadas">
-        {CAMADAS.map((c, i) => (
-          <li key={c.nome} className={mostra(passo, i, estatico)}><strong>{c.nome}</strong><span>{c.texto}</span></li>
-        ))}
-      </ol>
-    </div>
-  );
-}
-
 const DIFERENCIAIS = [
   { nome: "Família antes do Pix", texto: "O guardião é avisado enquanto ainda dá tempo de impedir." },
   { nome: "Palavra-senha", texto: "Uma palavra que só a família sabe, para desmascarar o falso parente." },
@@ -269,7 +249,6 @@ export const SLIDES: Record<string, (props: PropsSlide) => ReactNode> = {
   med: Med,
   solucao: Solucao,
   demo: Demo,
-  motor: Motor,
   diferenciais: Diferenciais,
   resultados: Resultados,
   fechamento: Fechamento,

@@ -53,7 +53,7 @@ As capturas estão em `.playwright-mcp/vespera/` (pasta local, fora do git).
 | P1 | Produção sem `DEMO_MODE`: a demo mostra "Não consegui conferir tudo" e o Pix depende da consulta externa de CNPJ. | Corrigir: `DEMO_MODE=true` no Railway. Preciso do seu OK. |
 | P1 | Sessão do pitch em produção está com 3 acessos e 3 confirmações de teste. | Corrigir: `Z Z` no pitch local com o token, antes de começar. |
 | P1 | Sem vídeo de backup. | Corrigir: gravar hoje, depois de ligar o `DEMO_MODE`. |
-| P1 | Slide 8 diz "Texto, print, áudio, link, Pix copia e cola ou QR Code", mas print e áudio não existem no app. | Corrigir o texto ou saber responder; é texto de slide, então aguardo sua decisão. |
+| ~~P1~~ | ~~Slide 8 dizia "Texto, print, áudio, link, Pix copia e cola ou QR Code", mas print e áudio não existem no app.~~ | Resolvido: o slide "Como funciona" saiu em 14/10, quando o pitch passou para 3:00. |
 | P1 | Compartilhar do Android para o app instalado cai em página 404 (`/compartilhar` não existe). | Esconder: tirar o `share_target` do manifesto. Não fiz porque mexe no que o celular instalado registra; a demo usa a conversa simulada. |
 | P2 | Limites de login e cadastro (5 por minuto) são compartilhados entre todos, porque a API vê o IP do proxy. | Aceitar para amanhã; não ligar `trustProxy` agora. |
 | P2 | O token do convite aparece na URL registrada no log da API. | Corrigir depois do pitch. |
